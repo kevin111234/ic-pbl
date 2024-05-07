@@ -22,16 +22,15 @@ print(onlinesales_df)
 # 데이터 클랜징
 # 결측값 확인
 customer_결측값_비율 = customer_df.isna().sum() / len(customer_df)
-print("고객 정보 결측값 비율:",customer_결측값_비율, end=" ")
+print("고객 정보 결측값 비율:",customer_결측값_비율)
 
 discount_결측값_비율 = discount_df.isna().sum() / len(discount_df)
-print("할인 정보 결측값 비율:", discount_결측값_비율, end=" ")
+print("할인 정보 결측값 비율:", discount_결측값_비율)
 
 marketing_결측값_비율 = marketing_df.isna().sum() / len(marketing_df)
-print("마케팅 정보 결측값 비율:", marketing_결측값_비율, end=" ")
-
+print("마케팅 정보 결측값 비율:", marketing_결측값_비율)
 online_결측값_비율 = onlinesales_df.isna().sum() / len(onlinesales_df)
-print("온라인 판매 정보 결측값 비율:", online_결측값_비율, end=" ")
+print("온라인 판매 정보 결측값 비율:", online_결측값_비율)
 
 # 날짜 형식변환
 marketing_df["날짜"] = pd.to_datetime(marketing_df["날짜"])
