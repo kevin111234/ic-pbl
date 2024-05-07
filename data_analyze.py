@@ -19,7 +19,20 @@ print(marketing_df)
 print("온라인판매정보")
 print(onlinesales_df)
 
-#데이터 클랜징
+# 데이터 클랜징
+# 결측값 확인
+customer_결측값_비율 = customer_df.isna().sum() / len(customer_df)
+print("고객 정보 결측값 비율:",customer_결측값_비율)
+
+discount_결측값_비율 = discount_df.isna().sum() / len(discount_df)
+print("할인 정보 결측값 비율:", discount_결측값_비율)
+
+marketing_결측값_비율 = marketing_df.isna().sum() / len(marketing_df)
+print("마케팅 정보 결측값 비율:", marketing_결측값_비율)
+
+online_결측값_비율 = onlinesales_df.isna().sum() / len(onlinesales_df)
+print("온라인 판매 정보 결측값 비율:", online_결측값_비율)
+
 #형식변환
 marketing_df["날짜"] = pd.to_datetime(marketing_df["날짜"])
 onlinesales_df["거래날짜"] = pd.to_datetime(onlinesales_df["거래날짜"])
@@ -27,7 +40,7 @@ onlinesales_df["거래날짜"] = pd.to_datetime(onlinesales_df["거래날짜"])
 month_mapping = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
 discount_df["월"] = discount_df["월"].apply(lambda x: 
                                                     pd.to_datetime(month_mapping[x], format='%m'))
-discount_df["월_기간"] = discount_df["월"].dt.to_period("M", starting_year=2019)
+discount_df["월_기간"] = pd.PeriodIndex(year=discount_df["월"].dt.year, month=discount_df["월"].dt.month, freq="M")
 #칼럼명 수정(거래날짜, 마케팅정보 날짜)
 
 
