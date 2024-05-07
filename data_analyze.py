@@ -52,3 +52,17 @@ print("마케팅정보")
 print(marketing_df)
 print("온라인판매정보")
 print(onlinesales_df)
+print("고객정보 + 온라인판매정보")
+print(detail_sales_df)
+
+# sql에 데이터를 저장할지 입력
+while True:
+    sql_save = input("데이터를 DB에 저장하겠습니까?(y/n): ")
+    if sql_save=="y":
+        print("데이터를 DB에 저장합니다")
+        break
+    elif sql_save=="n":
+        print("데이터를 저장하지 않습니다")
+        break
+    else:
+        print("잘못된 입력입니다. 다시 입력해주세요.")
