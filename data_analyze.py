@@ -82,6 +82,7 @@ while True:
     sql_save = input("데이터를 DB에 저장하시겠습니까?(y/n): ")
     if sql_save=="y":
         print("데이터를 DB에 저장합니다")
+        #sql 연결 후 저장파트 추가 필요
         break
     elif sql_save=="n":
         print("데이터를 저장하지 않습니다")
