@@ -2,6 +2,23 @@ import pandas as pd
 import pymysql
 from sqlalchemy import create_engine
 
+# sql 연결 및 저장 함수
+def sql_save():
+    # DB 연결정보 할당
+    db_host = "localhost"
+    db_user = "root"
+    db_password = input("sql 비밀번호를 입력하세요: ")
+    db_name = input("sql 데이터베이스 이름을 입력하세요: ")
+    # DB 연결객체 생성
+    conn = pymysql.connect(host=db_host, user=db_user, password=db_password, database=db_name)
+    # 커서 생성
+    cursor = conn.cursor()
+    # sql 저장 쿼리
+    #
+    # 커밋 후 연결 종료
+    conn.commit()
+    conn.close()
+
 # 로우데이터 읽기
 encoding = "cp949"
 errors = "skip" #raise(오류 알림), ignore(오류 무시), coerce(오류 값 변환), replace(값 대체), skip(행 생략) 중 선택
@@ -11,7 +28,7 @@ marketing_df = pd.read_csv("Marketing.csv",encoding=encoding, errors=errors) #�
 onlinesales_df = pd.read_csv("Onlinesales.csv",encoding=encoding, errors=errors) #고객ID, 거래ID(Transaction_#####), 거래날짜, 제품ID(Product_####) 제품카테고리, 주문수량, 단위가격(원), 배송비용(원), 할인쿠폰 적용여부
 
 # 데이터 클랜징
-# 결측값 확인
+# 결측값 확인 및 수정 -> <<<간소화 필요!>>>
 customer_결측값_비율 = customer_df.isna().sum() / len(customer_df)
 print("고객 정보 결측값 비율:",customer_결측값_비율)
 discount_결측값_비율 = discount_df.isna().sum() / len(discount_df)
@@ -38,7 +55,7 @@ if online_결측값_비율.any()>0:
 marketing_df["날짜"] = pd.to_datetime(marketing_df["날짜"])
 onlinesales_df["거래날짜"] = pd.to_datetime(onlinesales_df["거래날짜"])
 
-# 할인정보 월 데이터 변환
+# 할인정보 월 데이터 변환 -> <<<월 데이터 추출하는 함수 만들기!>>>
 month_mapping = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
 discount_df["월"] = discount_df["월"].apply(lambda x: pd.to_datetime(month_mapping[x], format='%m'))
 discount_df["월"] = discount_df["월"].astype(str)
@@ -47,7 +64,7 @@ discount_df["월"] = discount_df["월"].str[5:7].astype(int)
 # 칼럼명 수정(거래날짜, 마케팅정보 날짜)
 onlinesales_df.rename(columns={"거래날짜":"날짜"}, inplace=True)
 
-# 월 데이터 추출
+# 월 데이터 추출 -> <<<월 데이터 추출하는 함수 만들기!>>>
 discount_df["월"] = discount_df["월"].astype(int)
 marketing_df["월"] = marketing_df["날짜"].astype(str)
 marketing_df["월"] = marketing_df["월"].str[5:7].astype(int)
@@ -82,7 +99,7 @@ while True:
     sql_save = input("데이터를 DB에 저장하시겠습니까?(y/n): ")
     if sql_save=="y":
         print("데이터를 DB에 저장합니다")
-        #sql 연결 후 저장파트 추가 필요
+        sql_save()
         break
     elif sql_save=="n":
         print("데이터를 저장하지 않습니다")
