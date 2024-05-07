@@ -32,6 +32,8 @@ discount_df["월"] = discount_df["월"].astype(str)
 discount_df["월"] = discount_df["월"].str[5:7].astype(int)
 # 칼럼명 수정(거래날짜, 마케팅정보 날짜)
 onlinesales_df.rename(columns={"거래날짜":"날짜"}, inplace=True)
+# 고객 데이터와 온라인 판매 데이터 결합
+detail_sales_df = customer_df.merge(onlinesales_df, on="고객ID")
 
 # 클랜징 후 데이터 출력
 print("고객정보")
