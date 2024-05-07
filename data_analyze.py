@@ -33,16 +33,16 @@ print("마케팅 정보 결측값 비율:", marketing_결측값_비율, end=" ")
 online_결측값_비율 = onlinesales_df.isna().sum() / len(onlinesales_df)
 print("온라인 판매 정보 결측값 비율:", online_결측값_비율, end=" ")
 
-# 형식변환
+# 날짜 형식변환
 marketing_df["날짜"] = pd.to_datetime(marketing_df["날짜"])
 onlinesales_df["거래날짜"] = pd.to_datetime(onlinesales_df["거래날짜"])
 # 할인정보 월 데이터 변환
 month_mapping = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
-discount_df["월"] = discount_df["월"].apply(lambda x: 
-                                                    pd.to_datetime(month_mapping[x], format='%m'))
-discount_df["월_기간"] = pd.PeriodIndex(year=discount_df["월"].dt.year, month=discount_df["월"].dt.month, freq="M")
+discount_df["월"] = discount_df["월"].apply(lambda x: pd.to_datetime(month_mapping[x], format='%m'))
+discount_df["월"] = discount_df["월"].astype(str)
+discount_df["월"] = discount_df["월"].str[5:7].astype(int)
 # 칼럼명 수정(거래날짜, 마케팅정보 날짜)
-
+onlinesales_df.rename(columns={"거래날짜":"날짜"}, inplace=True)
 
 # 클랜징 후 데이터 출력
 print("고객정보")
