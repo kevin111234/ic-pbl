@@ -28,6 +28,7 @@ month_mapping = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Ju
 discount_df["월"] = discount_df["월"].apply(lambda x: 
                                                     pd.to_datetime(month_mapping[x], format='%m'))
 discount_df["월_기간"] = discount_df["월"].dt.to_period("M", starting_year=2019)
+#칼럼명 수정(거래날짜, 마케팅정보 날짜)
 
 
 #클랜징 후 데이터 출력
