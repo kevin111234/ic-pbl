@@ -11,13 +11,22 @@ def sql_save():
     db_name = input("sql 데이터베이스 이름을 입력하세요: ")
     # DB 연결객체 생성
     conn = pymysql.connect(host=db_host, user=db_user, password=db_password, database=db_name)
-    # 커서 생성
-    cursor = conn.cursor()
-    # sql 저장 쿼리
-    #
-    # 커밋 후 연결 종료
-    conn.commit()
-    conn.close()
+    try:
+        # 커서 생성
+        cursor = conn.cursor()
+        # sql 저장 쿼리
+        try:
+            #데이터베이스 업데이트 쿼리
+            print("데이터베이스에 데이터를 업데이트합니다.")
+        except:
+            #데이터베이스 테이블 추가 쿼리
+            print("데이터베이스 내에 테이블이 존재하지 않습니다.")
+        # 커밋 후 연결 종료
+        conn.commit()
+        conn.close()
+    except:
+        #데이터베이스 연결에서 오류가 발생했을 때
+        print("데이터베이스에 연결할 수 없습니다.")
 
 # 로우데이터 읽기
 encoding = "cp949"
