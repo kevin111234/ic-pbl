@@ -2,39 +2,13 @@ import pandas as pd
 import pymysql
 from sqlalchemy import create_engine
 
-# sql 연결 및 저장 함수
-def sql_save():
-    # DB 연결정보 할당
-    db_host = "localhost"
-    db_user = "root"
-    db_password = input("sql 비밀번호를 입력하세요: ")
-    db_name = input("sql 데이터베이스 이름을 입력하세요: ")
-    # DB 연결객체 생성
-    conn = pymysql.connect(host=db_host, user=db_user, password=db_password, database=db_name)
-    try:
-        # 커서 생성
-        cursor = conn.cursor()
-        # sql 저장 쿼리
-        try:
-            #데이터베이스 업데이트 쿼리
-            print("데이터베이스에 데이터를 업데이트합니다.")
-        except:
-            #데이터베이스 테이블 추가 쿼리
-            print("데이터베이스 내에 테이블이 존재하지 않습니다.")
-        # 커밋 후 연결 종료
-        conn.commit()
-        conn.close()
-    except:
-        #데이터베이스 연결에서 오류가 발생했을 때
-        print("데이터베이스에 연결할 수 없습니다.")
-
 # 로우데이터 읽기
 encoding = "cp949"
-errors = "skip" #raise(오류 알림), ignore(오류 무시), coerce(오류 값 변환), replace(값 대체), skip(행 생략) 중 선택
-customer_df = pd.read_csv("Customer.csv",encoding=encoding, errors=errors) #고객ID(USER_####), 고객성별(남/여), 고객지역, 가입기간(월)
-discount_df = pd.read_csv("Discount.csv",encoding=encoding, errors=errors) #월별 정보(JAN 등으로 표시), 제품 카테고리(불규칙적), 쿠폰코드, 할인률(%)
-marketing_df = pd.read_csv("Marketing.csv",encoding=encoding, errors=errors) #마케팅날짜, 온/오프라인 마케팅비용(원)
-onlinesales_df = pd.read_csv("Onlinesales.csv",encoding=encoding, errors=errors) #고객ID, 거래ID(Transaction_#####), 거래날짜, 제품ID(Product_####) 제품카테고리, 주문수량, 단위가격(원), 배송비용(원), 할인쿠폰 적용여부
+#errors = "skip" #raise(오류 알림), ignore(오류 무시), coerce(오류 값 변환), replace(값 대체), skip(행 생략) 중 선택
+customer_df = pd.read_csv("Customer.csv",encoding=encoding) #고객ID(USER_####), 고객성별(남/여), 고객지역, 가입기간(월)
+discount_df = pd.read_csv("Discount.csv",encoding=encoding) #월별 정보(JAN 등으로 표시), 제품 카테고리(불규칙적), 쿠폰코드, 할인률(%)
+marketing_df = pd.read_csv("Marketing.csv",encoding=encoding) #마케팅날짜, 온/오프라인 마케팅비용(원)
+onlinesales_df = pd.read_csv("Onlinesales.csv",encoding=encoding) #고객ID, 거래ID(Transaction_#####), 거래날짜, 제품ID(Product_####) 제품카테고리, 주문수량, 단위가격(원), 배송비용(원), 할인쿠폰 적용여부
 
 # 데이터 클랜징
 # 결측값 확인 및 수정 -> <<<간소화 필요!>>>
@@ -108,7 +82,7 @@ while True:
     sql_save = input("데이터를 DB에 저장하시겠습니까?(y/n): ")
     if sql_save=="y":
         print("데이터를 DB에 저장합니다")
-        sql_save()
+        #sql_save()
         break
     elif sql_save=="n":
         print("데이터를 저장하지 않습니다")
