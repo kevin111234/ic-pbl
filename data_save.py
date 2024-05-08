@@ -43,7 +43,7 @@ onlinesales_table = """
 table_list = [customer_table, discount_table, marketing_table, onlinesales_table]
 
 # sql 연결 및 저장 함수
-def sql_save():
+def sql_connect():
     # DB 연결정보 할당
     db_host = "localhost"
     db_user = "root"
@@ -64,3 +64,16 @@ def sql_save():
     except:
         #데이터베이스 연결에서 오류가 발생했을 때
         print("데이터베이스에 연결할 수 없습니다.")
+
+def sql_save():
+    while True:
+        save = input("데이터를 DB에 저장하시겠습니까?(y/n): ")
+        if save=="y":
+            print("데이터를 DB에 저장합니다")
+            sql_connect()
+            break
+        elif save=="n":
+            print("데이터를 저장하지 않습니다")
+            break
+        else:
+            print("잘못된 입력입니다. 다시 입력해주세요.")

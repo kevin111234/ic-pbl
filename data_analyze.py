@@ -20,16 +20,15 @@ for i in df_list:
 # 날짜 형식변환
 data_read.to_date(marketing_df, "날짜")
 data_read.to_date(onlinesales_df,"거래날짜")
+# 칼럼명 수정(거래날짜)
+onlinesales_df.rename(columns={"거래날짜":"날짜"}, inplace=True)
 
-# 할인정보 월 데이터 변환 -> <<<월 데이터 추출하는 함수 만들기!>>>
+# 할인정보 월 데이터 변환 
 month_mapping = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
 discount_df["월"] = discount_df["월"].apply(lambda x: pd.to_datetime(month_mapping[x], format='%m'))
 data_read.month_mapping(discount_df,"월")
 
-# 칼럼명 수정(거래날짜, 마케팅정보 날짜)
-onlinesales_df.rename(columns={"거래날짜":"날짜"}, inplace=True)
-
-# 월 데이터 추출 -> <<<월 데이터 추출하는 함수 만들기!>>>
+# 월 데이터 추출
 data_read.month_mapping(marketing_df,"날짜")
 data_read.month_mapping(onlinesales_df,"날짜")
 
@@ -57,14 +56,4 @@ print("온라인판매정보+마케팅정보")
 print(detail_consum_df)
 
 # sql에 데이터를 저장할지 입력
-while True:
-    sql_save = input("데이터를 DB에 저장하시겠습니까?(y/n): ")
-    if sql_save=="y":
-        print("데이터를 DB에 저장합니다")
-        data_save.sql_save()
-        break
-    elif sql_save=="n":
-        print("데이터를 저장하지 않습니다")
-        break
-    else:
-        print("잘못된 입력입니다. 다시 입력해주세요.")
+data_save.sql_save()
