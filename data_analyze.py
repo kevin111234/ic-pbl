@@ -56,4 +56,12 @@ print("온라인판매정보+마케팅정보")
 print(detail_consum_df)
 
 # sql에 데이터를 저장할지 입력
-data_save.sql_save()
+sql_pswd=input("SQL 비밀번호를 입력해주세요: ")
+data_save.save_to_db(customer_df,"customer",sql_pswd)
+data_save.save_to_db(discount_df,"discount",sql_pswd)
+data_save.save_to_db(marketing_df,"marketing",sql_pswd)
+data_save.save_to_db(onlinesales_df,"onlinesales",sql_pswd)
+
+conn, cursor = data_save.sql_setting(sql_pswd)
+conn.commit()
+conn.close()
