@@ -3,38 +3,18 @@ import pymysql
 from sqlalchemy import create_engine
 
 import data_save
+import data_read
 
 # 로우데이터 읽기
 encoding = "cp949"
-#errors = "skip" #raise(오류 알림), ignore(오류 무시), coerce(오류 값 변환), replace(값 대체), skip(행 생략) 중 선택
 customer_df = pd.read_csv("Customer.csv",encoding=encoding) #고객ID(USER_####), 고객성별(남/여), 고객지역, 가입기간(월)
 discount_df = pd.read_csv("Discount.csv",encoding=encoding) #월별 정보(JAN 등으로 표시), 제품 카테고리(불규칙적), 쿠폰코드, 할인률(%)
 marketing_df = pd.read_csv("Marketing.csv",encoding=encoding) #마케팅날짜, 온/오프라인 마케팅비용(원)
 onlinesales_df = pd.read_csv("Onlinesales.csv",encoding=encoding) #고객ID, 거래ID(Transaction_#####), 거래날짜, 제품ID(Product_####) 제품카테고리, 주문수량, 단위가격(원), 배송비용(원), 할인쿠폰 적용여부
 
 # 데이터 클랜징
-# 결측값 확인 및 수정 -> <<<간소화 필요!>>>
-customer_결측값_비율 = customer_df.isna().sum() / len(customer_df)
-print("고객 정보 결측값 비율:",customer_결측값_비율)
-discount_결측값_비율 = discount_df.isna().sum() / len(discount_df)
-print("할인 정보 결측값 비율:", discount_결측값_비율)
-marketing_결측값_비율 = marketing_df.isna().sum() / len(marketing_df)
-print("마케팅 정보 결측값 비율:", marketing_결측값_비율)
-online_결측값_비율 = onlinesales_df.isna().sum() / len(onlinesales_df)
-print("온라인 판매 정보 결측값 비율:", online_결측값_비율)
-
-if customer_결측값_비율.any()>0:
-    print("customer_df의 결측값이 존재합니다. 해당 행을 삭제합니다.")
-    customer_df.dropna(inplace=True)
-if discount_결측값_비율.any()>0:
-    print("discount_df의 결측값이 존재합니다. 해당 행을 삭제합니다.")
-    discount_df.dropna(inplace=True)
-if marketing_결측값_비율.any()>0:
-    print("marketing_df의 결측값이 존재합니다. 해당 행을 삭제합니다.")
-    marketing_df.dropna(inplace=True)
-if online_결측값_비율.any()>0:
-    print("onlinesales_df의 결측값이 존재합니다. 해당 행을 삭제합니다.")
-    onlinesales_df.dropna(inplace=True)
+for i in [customer_df, discount_df, marketing_df, onlinesales_df]:
+    data_read.na_cleaning(i)
 
 # 날짜 형식변환
 marketing_df["날짜"] = pd.to_datetime(marketing_df["날짜"])
