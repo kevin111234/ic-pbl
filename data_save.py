@@ -1,7 +1,7 @@
 import pymysql
 from sqlalchemy import create_engine
 
-# sql 연결 및 저장 쿼리
+# sql 테이블 생성 쿼리
 customer_table = """
 CREATE TABLE IF NOT EXISTS customer_info (
 customer_id CHAR(9) PRIMARY KEY,
@@ -14,24 +14,30 @@ discount_table = """
 CREATE TABLE IF NOT EXISTS discount_info (
 month INT,
 product_category VARCHAR(255),
-coupon_code VARCHAR(50),
-discount_rate INT
+coupon_code VARCHAR(50) PRIMARY KEY,
+discount_rate DECIMAL(3,1)
 );
 """
 marketing_table = """
-CREATE TABLE IF NOT EXISTS customer_info (
-customer_id CHAR(9) PRIMARY KEY,
-gender CHAR(1),
-region VARCHAR(255),
-subscription_duration INT
+CREATE TABLE IF NOT EXISTS marketing_info (
+date DATE PRIMARY KEY,
+offline_cost INT,
+online_cost INT,
+month INT
 );
 """
 onlinesales_table = """
-CREATE TABLE IF NOT EXISTS customer_info (
-customer_id CHAR(9) PRIMARY KEY,
-gender CHAR(1),
-region VARCHAR(255),
-subscription_duration INT
+CREATE TABLE IF NOT EXISTS onlinesales_info (
+customer_id CHAR(9),
+trade_id CHAR(16) PRIMARY KEY,
+date DATE,
+product_id CHAR(12),
+product_category VARCHAR(255),
+amount INT,
+average_price INT,
+dilivery_cost INT,
+coupon_status VARCHAR(10),
+month INT
 );
 """
 

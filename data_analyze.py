@@ -2,6 +2,8 @@ import pandas as pd
 import pymysql
 from sqlalchemy import create_engine
 
+import data_save
+
 # 로우데이터 읽기
 encoding = "cp949"
 #errors = "skip" #raise(오류 알림), ignore(오류 무시), coerce(오류 값 변환), replace(값 대체), skip(행 생략) 중 선택
@@ -82,7 +84,7 @@ while True:
     sql_save = input("데이터를 DB에 저장하시겠습니까?(y/n): ")
     if sql_save=="y":
         print("데이터를 DB에 저장합니다")
-        #sql_save()
+        data_save.sql_save()
         break
     elif sql_save=="n":
         print("데이터를 저장하지 않습니다")
