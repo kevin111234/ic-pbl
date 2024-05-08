@@ -40,6 +40,7 @@ onlinesales_table = """
         month INT
         );
     """
+table_list = [customer_table, discount_table, marketing_table, onlinesales_table]
 
 # sql 연결 및 저장 함수
 def sql_save():
@@ -47,12 +48,15 @@ def sql_save():
     db_host = "localhost"
     db_user = "root"
     db_password = input("sql 비밀번호를 입력하세요: ")
-    db_name = input("sql 데이터베이스 이름을 입력하세요: ")
+    db_name = "ic-pbl_analyze"
     # DB 연결객체 생성
     conn = pymysql.connect(host=db_host, user=db_user, password=db_password, database=db_name)
     try:
         # 커서 생성
         cursor = conn.cursor()
+        # sql 테이블이 없으면 테이블 생성
+        for i in table_list:
+            cursor.execute(i)
         # sql 저장 쿼리
         # 커밋 후 연결 종료
         conn.commit()
