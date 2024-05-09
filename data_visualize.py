@@ -14,9 +14,11 @@ engine,query = data_save.db_pull_out("marketing_info", sql_pswd)
 marketing_df = pd.read_sql(query, engine)
 engine,query = data_save.db_pull_out("onlinesales_info", sql_pswd)
 onlisesales_df = pd.read_sql(query, engine)
-engine.dispose()
 
 # SQL에서 데이터 결합해서 들고오기
+
+
+engine.dispose()
 
 # 데이터 분석해서 여러 형태로 변환
 
