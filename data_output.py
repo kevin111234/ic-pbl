@@ -10,8 +10,10 @@ def db_pull_out(dataframe,sql_pswd):
     query = f"SELECT * FROM {dataframe}"
     return engine,query
 
-# 데이터 결합해서 불러오기 함수
-def db_select_out(dataframe1,dataframe2,group_column,sql_pswd):
+# 칼럼명으로 두 데이터 결합해서 불러오기 함수
+def db_group_2colum(dataframe1,dataframe2,group_column,sql_pswd):
     engine = data_save.sql_setting_Alchemy(sql_pswd)
-    query = f"SELECT * FROM {dataframe1}"
+    query = f'''SELECT * 
+    FROM {dataframe1} INNER JOIN {dataframe2} ON {dataframe1}.{group_column}={dataframe2}.{group_column}
+    '''
     return engine,query

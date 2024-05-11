@@ -153,8 +153,3 @@ def save_to_db(dataframe, df_name,sql_pswd):
         else:
             print("잘못된 입력입니다. 다시 입력해주세요.")
 
-# 데이터 불러오기 함수
-def db_pull_out(dataframe,sql_pswd):
-    engine = sql_setting_Alchemy(sql_pswd)
-    query = f"SELECT * FROM {dataframe}"
-    return engine,query
