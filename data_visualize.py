@@ -117,7 +117,6 @@ engine,query = data_output.db_group_1column("onlinesales_info.`제품카테고�
                                             ,"GROUP BY onlinesales_info.`제품카테고리`")
 category_df = pd.read_sql(query, engine)
 
-
 # 분석 결과 시각화
 # 1. 지역별 선호제품 경향 파악 - local_count_df
 fig, axes = plt.subplots(2, 2, figsize=(15, 18), gridspec_kw={'height_ratios': [2, 2]}) 
