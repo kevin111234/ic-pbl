@@ -53,11 +53,6 @@ engine,query = data_output.db_group_1column("customer_info.고객지역, COUNT(*
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                             ,"GROUP BY customer_info.고객지역 ORDER BY 고객지역 DESC, 구매금액 DESC")
 local_df = pd.read_sql(query, engine)
-# 가입기간별 카테고리 구매정보
-engine,query = data_output.db_group_1column("customer_info.가입기간, 제품카테고리, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
-                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
-                                            ,"GROUP BY customer_info.가입기간, onlinesales_info.제품카테고리 ORDER BY 가입기간 DESC, 구매금액 DESC")
-period_customer_df = pd.read_sql(query, engine)
 # 성별별 카테고리 구매정보
 engine,query = data_output.db_group_1column("customer_info.성별, COUNT(*)AS 고객_수, 제품카테고리, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
@@ -126,7 +121,7 @@ case_statements = ",\n".join([f"(SUM(CASE WHEN 제품카테고리 = '{category}'
 query = query.format(case_statements)
 individual_count_df = pd.read_sql(query, engine)
 
-# 2.
+# 2.지역별 선호제품 경향 파악
 # 동적 SQL 쿼리 생성
 query = """SELECT customer_info.고객지역, {}
 FROM customer_info JOIN onlinesales_info ON customer_info.고객ID=onlinesales_info.고객ID
@@ -137,6 +132,13 @@ case_statements = ",\n".join([f"(SUM(CASE WHEN 제품카테고리 = '{category}'
 # 쿼리 문자열에 CASE 문 삽입
 query = query.format(case_statements)
 local_count_df = pd.read_sql(query, engine)
+
+# 3. 가입기간별 구입추이 경향 파악
+# 가입기간별 카테고리 구매정보
+engine,query = data_output.db_group_1column("customer_info.가입기간, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
+                                            ,"GROUP BY customer_info.가입기간 ORDER BY 가입기간 ASC")
+period_customer_df = pd.read_sql(query, engine)
 
 # 6. 성별에 따른 시장규모 비교
 engine,query = data_output.db_group_1column("customer_info.성별, COUNT(*)AS 고객_수, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
@@ -151,28 +153,40 @@ gender_df = pd.read_sql(query, engine)
 
 # 2. 지역별 선호제품 경향 파악 - local_count_df
 regions = ["Chicago", "California", "NewYork", "New Jersey", "Washington DC"]
-fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+fig, axes = plt.subplots(2, 2, figsize=(15, 18), gridspec_kw={'height_ratios': [2, 2]}) 
 
-# 1번 서브플롯: 고객 지역별 상품 구매 비율
+# 첫 번째 서브플롯: 고객 지역별 상품 구매 비율
 for i, region in enumerate(regions):
     x = np.arange(len(categories))  # x축에 사용할 카테고리 인덱스
     y = local_count_df[[f"{category.lower()}비율" for category in categories]].loc[i]  # 해당 지역의 카테고리별 비율
-    axes[0].plot(x, y, label=region)
+    axes[0, 0].plot(x, y, label=region)
 
-axes[0].set_xticks(np.arange(len(categories)))  # x축 눈금 설정
-axes[0].set_xticklabels(categories)  # x축 눈금 라벨 설정
-axes[0].set_xlabel("카테고리")
-axes[0].set_ylabel("상품 구매 비율")
-axes[0].set_title("고객 지역별 상품 구매 비율")
-axes[0].set_xticklabels(categories, rotation=90)
-axes[0].legend()
+axes[0, 0].set_xticks(np.arange(len(categories)))  # x축 눈금 설정
+axes[0, 0].set_xticklabels(categories, rotation=90)  # x축 눈금 라벨 설정
+axes[0, 0].set_xlabel("카테고리")
+axes[0, 0].set_ylabel("상품 구매 비율")
+axes[0, 0].set_title("고객 지역별 상품 구매 비율")
+axes[0, 0].legend()
 
-# 2번 서브플롯: 성별에 따른 구매금액 비교
-axes[1].bar(gender_df["성별"], gender_df["구매금액"], color="skyblue", width=0.4)
-axes[1].set_title("성별에 따른 구매금액 (단위: 억 원)")
-axes[1].set_ylabel("구매금액")
+# 두 번째 서브플롯: 성별에 따른 구매금액
+axes[0, 1].bar(gender_df["성별"], gender_df["구매금액"], color="skyblue", width=0.4)
+axes[0, 1].set_xlabel("성별")
+axes[0, 1].set_ylabel("구매금액")
+axes[0, 1].set_title("성별에 따른 구매금액 (단위: 억 원)")
 for i, value in enumerate(gender_df["구매금액"]):
-    axes[1].text(i, value + 1, str(value), ha='center')
+    axes[1, 1].text(i, value + 1, str(value), ha='center')
 
-plt.tight_layout()  # 서브플롯 간 간격 조절
+# 세 번째 서브플롯: 가입기간별 구매금액
+axes[1, 0].plot(period_customer_df["가입기간"], period_customer_df["구매금액"], color="blue")
+axes[1, 0].set_xlabel("가입기간")
+axes[1, 0].set_ylabel("구매금액")
+axes[1, 0].set_title("가입기간별 구매금액")
+
+# 네 번째 서브플롯: 가입기간별 구매 수량
+axes[1, 1].plot(period_customer_df["가입기간"], period_customer_df["수량"], color="green")
+axes[1, 1].set_xlabel("가입기간")
+axes[1, 1].set_ylabel("구매 수량")
+axes[1, 1].set_title("가입기간별 구매 수량")
+
+plt.tight_layout(pad=1.0)  # 서브플롯 간 간격 조절
 plt.show()
