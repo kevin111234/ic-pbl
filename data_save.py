@@ -1,5 +1,5 @@
 import pymysql
-import sqlalchemy
+from sqlalchemy import create_engine
 
 # sql 테이블 생성, 데이터 저장 쿼리
 customer_table = """
@@ -102,6 +102,16 @@ def sql_setting(sql_pswd):
     cursor = conn.cursor()
     return conn,cursor
 
+def sql_setting_Alchemy(sql_pswd):
+    db_host = "localhost"
+    db_user = "root"
+    db_password = sql_pswd
+    db_name = "ic-pbl_analyze"
+    db_port = 3306
+
+    engine = create_engine(f'mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}')
+    return engine
+
 # 테이블 생성
 def create_tables(df_name, sql_pswd):
     conn, cursor = sql_setting(sql_pswd)
@@ -142,3 +152,4 @@ def save_to_db(dataframe, df_name,sql_pswd):
             break
         else:
             print("잘못된 입력입니다. 다시 입력해주세요.")
+
