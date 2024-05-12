@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 import pymysql
 from matplotlib import pyplot as plt
 from matplotlib import font_manager, rc
+import numpy as np
 
 import data_output
 
@@ -11,6 +12,7 @@ font_path = "C:\\Users\\jaeho\\Desktop\\재홍\\포토샵 글꼴 모음\\Gmarket
 # 폰트 설정
 font_name = font_manager.FontProperties(fname=font_path).get_name()
 rc('font', family=font_name)
+plt.rcParams.update({'font.size': 10})
 
 sql_pswd = input("SQL 비밀번호를 입력해주세요: ")
 
@@ -23,7 +25,7 @@ engine,query = data_output.db_pull_out("*","marketing_info", sql_pswd)
 marketing_df = pd.read_sql(query, engine)
 engine,query = data_output.db_pull_out("*","onlinesales_info", sql_pswd)
 onlisesales_df = pd.read_sql(query, engine)
-
+""""
 # 2테이블 결합
 # 고객정보 판매정보 결합
 engine,query = data_output.db_group_1column("*","customer_info", "onlinesales_info", "고객ID", sql_pswd)
@@ -36,11 +38,6 @@ engine,query = data_output.db_group_1column("*","marketing_info", "onlinesales_i
 marketing_onlinesales_df = pd.read_sql(query, engine)
 
 # 추가 세부자료
-# 카테고리별 고객 구매정보
-engine,query = data_output.db_group_1column("customer_info.고객ID, 제품카테고리, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
-                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
-                                            ,"GROUP BY customer_info.고객ID, onlinesales_info.제품카테고리 ORDER BY 고객ID DESC, 구매금액 DESC")
-individual_customer_df = pd.read_sql(query, engine)
 # 월별 고객 구매정보
 engine,query = data_output.db_group_1column("customer_info.고객ID, 월, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
@@ -66,11 +63,7 @@ engine,query = data_output.db_group_1column("customer_info.성별, COUNT(*)AS �
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                             ,"GROUP BY customer_info.성별, onlinesales_info.제품카테고리 ORDER BY 구매금액 DESC")
 gender_customer_df = pd.read_sql(query, engine)
-# 성별별 구매정보
-engine,query = data_output.db_group_1column("customer_info.성별, COUNT(*)AS 고객_수, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
-                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
-                                            ,"GROUP BY customer_info.성별 ORDER BY 구매금액 DESC")
-gender_df = pd.read_sql(query, engine)
+
 # 월별 구매정보
 engine,query = data_output.db_group_1column("discount_info.`월`, discount_info.`할인율`, SUM(onlinesales_info.수량)AS 수량"
                                             , "discount_info","onlinesales_info","월", sql_pswd
@@ -81,24 +74,6 @@ engine,query = data_output.db_group_1column("discount_info.`할인율`, SUM(onli
                                             , "discount_info","onlinesales_info","월", sql_pswd
                                             ,"GROUP BY discount_info.`할인율` ORDER BY 할인율 ASC")
 rate_discount_df = pd.read_sql(query, engine)
-
-"""customer_df = data_output.select_dataframe("customer_df",sql_pswd)
-discount_df = data_output.select_dataframe("discount_df",sql_pswd)
-marketing_df = data_output.select_dataframe("marketing_df",sql_pswd)
-onlinesales_df = data_output.select_dataframe("onlinesales_df",sql_pswd)
-customer_onlinesales_df = data_output.select_dataframe("customer_df",sql_pswd)
-discount_onlinesales_df = data_output.select_dataframe("discount_onlinesales_df",sql_pswd)
-marketing_onlinesales_df = data_output.select_dataframe("marketing_onlinesales_df",sql_pswd)
-discount_onlinesales_df = data_output.select_dataframe("discount_onlinesales_df",sql_pswd)
-individual_customer_df = data_output.select_dataframe("individual_customer_df",sql_pswd)
-month_customer_df = data_output.select_dataframe("month_customer_df",sql_pswd)
-local_customer_df = data_output.select_dataframe("local_customer_df",sql_pswd)
-local_df = data_output.select_dataframe("local_df",sql_pswd)
-period_customer_df = data_output.select_dataframe("period_customer_df",sql_pswd)
-gender_customer_df = data_output.select_dataframe("gender_customer_df",sql_pswd)
-gender_df = data_output.select_dataframe("gender_df",sql_pswd)
-month_discount_df = data_output.select_dataframe("month_discount_df",sql_pswd)
-rate_discount_df = data_output.select_dataframe("rate_discount_df",sql_pswd)
 """
 """
 # 확인용 print문
@@ -136,14 +111,68 @@ print(month_discount_df)
 print("할인율별 구매정보")
 print(rate_discount_df)
 """
+# 1. 고객별 선호제품 경향 파악
+# 사용자로부터 입력받은 카테고리 목록
+categories = ["Nest-USA","Office","Apparel","Drinkware","Notebooks & Journals","Waze","Fun","Headgear","Lifestyle","Nest-Canada","Bags",
+                "Gift Cards","Android","Bottles","Backpacks","Google","Housewares","Accessories","Nest","More Bags"]
+# 동적 SQL 쿼리 생성
+query = """SELECT customer_info.고객ID, {}
+FROM customer_info JOIN onlinesales_info ON customer_info.고객ID=onlinesales_info.고객ID
+GROUP BY customer_info.고객ID;
+"""
+# 각 카테고리에 대한 CASE 문 생성
+case_statements = ",\n".join([f"(SUM(CASE WHEN 제품카테고리 = '{category}' THEN 1 ELSE 0 END)/COUNT(*))*100 AS '{category.lower()}비율'" for category in categories])
+# 쿼리 문자열에 CASE 문 삽입
+query = query.format(case_statements)
+individual_count_df = pd.read_sql(query, engine)
+
+# 2.
+# 동적 SQL 쿼리 생성
+query = """SELECT customer_info.고객지역, {}
+FROM customer_info JOIN onlinesales_info ON customer_info.고객ID=onlinesales_info.고객ID
+GROUP BY customer_info.고객지역;
+"""
+# 각 카테고리에 대한 CASE 문 생성
+case_statements = ",\n".join([f"(SUM(CASE WHEN 제품카테고리 = '{category}' THEN 1 ELSE 0 END)/COUNT(*))*100 AS '{category.lower()}비율'" for category in categories])
+# 쿼리 문자열에 CASE 문 삽입
+query = query.format(case_statements)
+local_count_df = pd.read_sql(query, engine)
+
+# 6. 성별에 따른 시장규모 비교
+engine,query = data_output.db_group_1column("customer_info.성별, COUNT(*)AS 고객_수, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
+                                            ,"GROUP BY customer_info.성별 ORDER BY 구매금액 DESC")
+gender_df = pd.read_sql(query, engine)
 
 # 분석 결과 시각화
-# 성별별 카테고리 구매정보
+# 1. 고객별 선호제품 경향 파악 - individual_count_df(데이터 양이너무 많아서 시각화 빡셈. 그룹으로 더 묶어서 확인하기.)
+#for category in categories:
+#    plt.plot(individual_count_df[f"{category.lower()}비율"],individual_count_df["고객ID"])
 
-# 성별별 구매정보
-plt.bar(gender_df["성별"], gender_df["구매금액"], color="skyblue", width=0.4)
-plt.title("성별에 따른 구매금액 (단위: 억 원)")
-plt.ylabel("구매금액")
+# 2. 지역별 선호제품 경향 파악 - local_count_df
+regions = ["Chicago", "California", "NewYork", "New Jersey", "Washington DC"]
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+# 1번 서브플롯: 고객 지역별 상품 구매 비율
+for i, region in enumerate(regions):
+    x = np.arange(len(categories))  # x축에 사용할 카테고리 인덱스
+    y = local_count_df[[f"{category.lower()}비율" for category in categories]].loc[i]  # 해당 지역의 카테고리별 비율
+    axes[0].plot(x, y, label=region)
+
+axes[0].set_xticks(np.arange(len(categories)))  # x축 눈금 설정
+axes[0].set_xticklabels(categories)  # x축 눈금 라벨 설정
+axes[0].set_xlabel("카테고리")
+axes[0].set_ylabel("상품 구매 비율")
+axes[0].set_title("고객 지역별 상품 구매 비율")
+axes[0].set_xticklabels(categories, rotation=90)
+axes[0].legend()
+
+# 2번 서브플롯: 성별에 따른 구매금액 비교
+axes[1].bar(gender_df["성별"], gender_df["구매금액"], color="skyblue", width=0.4)
+axes[1].set_title("성별에 따른 구매금액 (단위: 억 원)")
+axes[1].set_ylabel("구매금액")
 for i, value in enumerate(gender_df["구매금액"]):
-    plt.text(i, value + 1, str(value), ha='center', fontsize=12)
+    axes[1].text(i, value + 1, str(value), ha='center')
+
+plt.tight_layout()  # 서브플롯 간 간격 조절
 plt.show()
