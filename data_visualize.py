@@ -8,7 +8,7 @@ import numpy as np
 import data_output
 
 # 한글 폰트 경로 설정
-font_path = "C:\\Users\\jaeho\\Desktop\\재홍\\포토샵 글꼴 모음\\GmarketSansTTFMedium.ttf"  # 사용하고자 하는 한글 폰트 경로로 변경
+font_path = "GmarketSansTTFMedium.ttf"  # 사용하고자 하는 한글 폰트 경로로 변경
 # 폰트 설정
 font_name = font_manager.FontProperties(fname=font_path).get_name()
 rc('font', family=font_name)
