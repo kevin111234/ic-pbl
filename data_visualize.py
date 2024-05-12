@@ -2,7 +2,6 @@ import pandas as pd
 from sqlalchemy import create_engine
 import pymysql
 
-import data_save
 import data_output
 
 # SQL에서 데이터 들고오기
@@ -33,6 +32,11 @@ engine,query = data_output.db_group_1column("customer_info.고객ID, 제품카�
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                             ,"GROUP BY customer_info.고객ID, onlinesales_info.제품카테고리 ORDER BY 고객ID DESC, 구매금액 DESC")
 individual_customer_df = pd.read_sql(query, engine)
+# 월별 고객 구매정보
+engine,query = data_output.db_group_1column("customer_info.고객ID, 월, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
+                                            ,"GROUP BY customer_info.고객ID, onlinesales_info.월 ORDER BY 고객ID DESC, 월 ASC, 구매금액 DESC")
+month_customer_df = pd.read_sql(query, engine)
 # 고객지역별 카테고리 구매정보
 engine,query = data_output.db_group_1column("customer_info.고객지역, 제품카테고리, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
@@ -89,6 +93,8 @@ print(marketing_onlinesales_df)
 # 세부결합 테이블
 print("카테고리별 고객 구매정보")
 print(individual_customer_df)
+print("월별 고객 구매정보")
+print(month_customer_df)
 print("고객지역별 카테고리 구매정보")
 print(local_customer_df)
 print("고객지역별 구매정보")
@@ -103,7 +109,5 @@ print("월별 구매정보")
 print(month_discount_df)
 print("할인율별 구매정보")
 print(rate_discount_df)
-
-# 데이터 분석해서 여러 형태로 변환
 
 # 분석 결과 시각화
