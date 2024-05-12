@@ -89,7 +89,7 @@ query = query.format(case_statements)
 local_count_df = pd.read_sql(query, engine)
 
 # 2. 성별에 따른 시장규모 비교
-engine,query = data_output.db_group_1column("customer_info.성별, COUNT(*)AS 고객_수, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+engine,query = data_output.db_group_1column("customer_info.성별, COUNT(DISTINCT customer_info.고객ID)AS 고객_수, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                             ,"GROUP BY customer_info.성별 ORDER BY 구매금액 DESC")
 gender_df = pd.read_sql(query, engine)
@@ -102,14 +102,20 @@ engine,query = data_output.db_group_1column("customer_info.가입기간, SUM(평
 period_customer_df = pd.read_sql(query, engine)
 
 # 4. 성별에 따른 카테고리별 (평균) 구매량 비교
-engine,query = data_output.db_group_1column("customer_info.`성별`, onlinesales_info.`제품카테고리`,COUNT(*)AS 고객수, SUM(onlinesales_info.`수량`)AS 수량, SUM(평균금액*수량+배송료)AS 구매금액, (SUM(onlinesales_info.`수량`)/COUNT(*))AS 평균수량,(SUM(평균금액*수량+배송료)/COUNT(*))AS 평균구매액"
+engine,query = data_output.db_group_1column("customer_info.`성별`, onlinesales_info.`제품카테고리`,COUNT(DISTINCT customer_info.고객ID)AS 고객수, SUM(onlinesales_info.`수량`)AS 수량, SUM(평균금액*수량+배송료)AS 구매금액, (SUM(onlinesales_info.`수량`)/COUNT(*))AS 평균수량,(SUM(평균금액*수량+배송료)/COUNT(*))AS 평균구매액"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                             ,'''WHERE 성별="남"GROUP BY customer_info.`성별`, onlinesales_info.`제품카테고리`''')
 male_customer_df = pd.read_sql(query, engine)
-engine,query = data_output.db_group_1column("customer_info.`성별`, onlinesales_info.`제품카테고리`,COUNT(*)AS 고객수, SUM(onlinesales_info.`수량`)AS 수량, SUM(평균금액*수량+배송료)AS 구매금액, (SUM(onlinesales_info.`수량`)/COUNT(*))AS 평균수량,(SUM(평균금액*수량+배송료)/COUNT(*))AS 평균구매액"
+engine,query = data_output.db_group_1column("customer_info.`성별`, onlinesales_info.`제품카테고리`,COUNT(DISTINCT customer_info.고객ID)AS 고객수, SUM(onlinesales_info.`수량`)AS 수량, SUM(평균금액*수량+배송료)AS 구매금액, (SUM(onlinesales_info.`수량`)/COUNT(*))AS 평균수량,(SUM(평균금액*수량+배송료)/COUNT(*))AS 평균구매액"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                             ,'''WHERE 성별="여"GROUP BY customer_info.`성별`, onlinesales_info.`제품카테고리`''')
 female_customer_df = pd.read_sql(query, engine)
+
+# 5. 카테고리별 시장규모 비교
+engine,query = data_output.db_group_1column("onlinesales_info.`제품카테고리`,COUNT(DISTINCT customer_info.고객ID)AS 고객수, SUM(onlinesales_info.`수량`)AS 수량, SUM(평균금액*수량+배송료)AS 구매금액, (SUM(onlinesales_info.`수량`)/COUNT(*))AS 평균수량,(SUM(평균금액*수량+배송료)/COUNT(*))AS 평균구매액"
+                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
+                                            ,"GROUP BY onlinesales_info.`제품카테고리`")
+category_df = pd.read_sql(query, engine)
 
 
 # 분석 결과 시각화
@@ -199,6 +205,36 @@ axes[1, 1].set_title("고객별 평균 구매 금액")
 axes[1, 1].set_ylabel("평균 구매")
 axes[1, 1].legend()
 axes[1, 1].tick_params(axis='x', rotation=90)  # x축 라벨 90도 회전
+
+plt.tight_layout()
+plt.show()
+
+# 카테고리별 시장규모 시각화
+fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+
+# 수량 그래프
+axes[0, 0].bar(category_df["제품카테고리"], category_df["수량"], color="skyblue")
+axes[0, 0].set_ylabel("수량")
+axes[0, 0].set_title("카테고리별 구매 수량")
+axes[0, 0].tick_params(axis='x', labelrotation=90)
+
+# 구매금액 그래프
+axes[0, 1].bar(category_df["제품카테고리"], category_df["구매금액"], color="salmon")
+axes[0, 1].set_ylabel("구매금액")
+axes[0, 1].set_title("카테고리별 구매금액")
+axes[0, 1].tick_params(axis='x', labelrotation=90)
+
+# 평균수량 그래프
+axes[1, 0].bar(category_df["제품카테고리"], category_df["평균수량"], color="lightgreen")
+axes[1, 0].set_ylabel("평균수량")
+axes[1, 0].set_title("카테고리별 평균 구매 수량")
+axes[1, 0].tick_params(axis='x', labelrotation=90)
+
+# 평균구매액 그래프
+axes[1, 1].bar(category_df["제품카테고리"], category_df["평균구매액"], color="orange")
+axes[1, 1].set_ylabel("평균구매액")
+axes[1, 1].set_title("카테고리별 평균 구매금액")
+axes[1, 1].tick_params(axis='x', labelrotation=90)
 
 plt.tight_layout()
 plt.show()
