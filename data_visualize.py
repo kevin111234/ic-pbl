@@ -4,6 +4,8 @@ import pymysql
 from matplotlib import pyplot as plt
 from matplotlib import font_manager, rc
 import numpy as np
+from sklearn.manifold import TSNE
+import seaborn as sns
 
 import data_output
 
@@ -27,9 +29,6 @@ engine,query = data_output.db_pull_out("*","onlinesales_info", sql_pswd)
 onlisesales_df = pd.read_sql(query, engine)
 """"
 # 2테이블 결합
-# 고객정보 판매정보 결합
-engine,query = data_output.db_group_1column("*","customer_info", "onlinesales_info", "고객ID", sql_pswd)
-customer_onlinesales_df = pd.read_sql(query, engine)
 #할인정보 판매정보 결합
 engine,query = data_output.db_group_2column("*","discount_info", "onlinesales_info", "월", "제품카테고리", sql_pswd)
 discount_onlinesales_df = pd.read_sql(query, engine)
@@ -38,11 +37,6 @@ engine,query = data_output.db_group_1column("*","marketing_info", "onlinesales_i
 marketing_onlinesales_df = pd.read_sql(query, engine)
 
 # 추가 세부자료
-# 월별 고객 구매정보
-engine,query = data_output.db_group_1column("customer_info.고객ID, 월, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
-                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
-                                            ,"GROUP BY customer_info.고객ID, onlinesales_info.월 ORDER BY 고객ID DESC, 월 ASC, 구매금액 DESC")
-month_customer_df = pd.read_sql(query, engine)
 # 고객지역별 카테고리 구매정보
 engine,query = data_output.db_group_1column("customer_info.고객지역, 제품카테고리, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
@@ -117,8 +111,19 @@ engine,query = data_output.db_group_1column("onlinesales_info.`제품카테고�
                                             ,"GROUP BY onlinesales_info.`제품카테고리`")
 category_df = pd.read_sql(query, engine)
 
+# 6. 월별 구매량 비교
+# 개별 월별 구매량
+engine,query = data_output.db_group_1column("customer_info.고객ID, 월, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
+                                            ,"GROUP BY customer_info.고객ID, onlinesales_info.월 ORDER BY 고객ID DESC, 월 ASC, 구매금액 DESC")
+month_customer_df = pd.read_sql(query, engine)
+
+# 고객정보 판매정보 결합 - 고객특성 분석
+engine,query = data_output.db_group_1column("*","customer_info", "onlinesales_info", "고객ID", sql_pswd)
+customer_onlinesales_df = pd.read_sql(query, engine)
+customer_onlinesales_df = pd.get_dummies(customer_onlinesales_df, columns=['고객지역'])
+
 # 분석 결과 시각화
-# 1. 지역별 선호제품 경향 파악 - local_count_df
 fig, axes = plt.subplots(2, 2, figsize=(15, 18), gridspec_kw={'height_ratios': [2, 2]}) 
 
 # 첫 번째 서브플롯: 고객 지역별 상품 구매 비율
@@ -157,7 +162,7 @@ axes[1, 1].set_title("가입기간별 구매 수량")
 plt.tight_layout()  # 서브플롯 간 간격 조절
 plt.show()
 
-# 다섯 번째 서브플롯: 성별에 따른 평균 구매 수량
+# 성별에 따른 평균 구매 수량
 categories = male_customer_df["제품카테고리"]
 
 # 그래프를 위한 데이터 준비
@@ -236,4 +241,14 @@ axes[1, 1].set_title("카테고리별 평균 구매금액")
 axes[1, 1].tick_params(axis='x', labelrotation=90)
 
 plt.tight_layout()
+plt.show()
+
+customer_location_df = customer_onlinesales_df[['고객지역_California', '고객지역_Chicago', '고객지역_New Jersey', '고객지역_New York', '고객지역_Washington DC']]
+
+# 각 도시에 대한 고객 분포 시각화
+customer_location_df.sum().plot(kind='bar')
+plt.title('고객 지역별 분포')
+plt.xlabel('고객 지역')
+plt.ylabel('고객 수')
+plt.xticks(rotation=45)
 plt.show()
