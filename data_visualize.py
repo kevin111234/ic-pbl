@@ -299,7 +299,6 @@ categories = rate_discount_df['제품카테고리'].unique()
 
 # 할인율 리스트
 discount_rates = rate_discount_df['할인율'].unique()
-print(discount_rates)
 
 # 그래프를 그릴 때 사용할 색상
 colors = sns.color_palette("husl", 3)
