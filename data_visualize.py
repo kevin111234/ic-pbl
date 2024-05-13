@@ -367,7 +367,7 @@ plt.show()
 plt.figure(figsize=(10, 6))
 
 # 매일의 온라인 마케팅 비용
-plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['온라인비용'], label='온라인 마케팅 비용')
+plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['온라인비용'], label='온라인 마케팅 비용',color='tab:purple')
 plt.title('매일의 온라인 마케팅 비용')
 plt.xlabel('날짜')
 plt.ylabel('온라인비용')
@@ -380,7 +380,7 @@ plt.show()
 plt.figure(figsize=(10, 6))
 
 # 매일의 수량
-plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['수량'], label='수량')
+plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['수량'], label='수량',color='tab:orange')
 plt.title('매일의 수량')
 plt.xlabel('날짜')
 plt.ylabel('수량')
@@ -393,7 +393,7 @@ plt.show()
 plt.figure(figsize=(10, 6))
 
 # 매일의 구매금액
-plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['구매금액'], label='구매금액')
+plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['구매금액'], label='구매금액',color='tab:blue')
 plt.title('매일의 구매금액')
 plt.xlabel('날짜')
 plt.ylabel('구매금액')
