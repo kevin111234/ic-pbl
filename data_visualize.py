@@ -113,9 +113,9 @@ category_df = pd.read_sql(query, engine)
 
 # 6. 월별 구매량 비교
 # 개별 월별 구매량
-engine,query = data_output.db_group_1column("customer_info.고객ID, 월, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+engine,query = data_output.db_group_1column("onlinesales_info.월, COUNT(DISTINCT customer_info.고객ID)AS 고객수, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
                                             ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
-                                            ,"GROUP BY customer_info.고객ID, onlinesales_info.월 ORDER BY 고객ID DESC, 월 ASC, 구매금액 DESC")
+                                            ,"GROUP BY onlinesales_info.월 ORDER BY 월 ASC")
 month_customer_df = pd.read_sql(query, engine)
 
 # 고객정보 판매정보 결합 - 고객특성 분석
@@ -243,12 +243,43 @@ axes[1, 1].tick_params(axis='x', labelrotation=90)
 plt.tight_layout()
 plt.show()
 
-customer_location_df = customer_onlinesales_df[['고객지역_California', '고객지역_Chicago', '고객지역_New Jersey', '고객지역_New York', '고객지역_Washington DC']]
+# 월별 판매량(수량)
+plt.figure(figsize=(20, 12))
+
+plt.subplot(2, 2, 1)
+plt.plot(month_customer_df.index+1, month_customer_df['수량'], marker='o', linestyle='-')
+plt.title('월별 구매량 추이')
+plt.xlabel('월')
+plt.ylabel('구매량')
+plt.xticks(month_customer_df.index+1)  # x 축에 월 표시
+plt.grid(True)
+
+# 월별 판매량(금액)
+plt.subplot(2, 2, 2)
+plt.plot(month_customer_df.index+1, month_customer_df['구매금액'], marker='o', linestyle='-')
+plt.title('월별 구매금액 추이')
+plt.xlabel('월')
+plt.ylabel('구매금액')
+plt.xticks(month_customer_df.index+1)  # x 축에 월 표시
+plt.grid(True)
+
+# 월별 판매량(이용 고객 수)
+plt.subplot(2, 2, 3)
+plt.plot(month_customer_df.index+1, month_customer_df['고객수'], marker='o', linestyle='-')
+plt.title('월별 이용자 추이')
+plt.xlabel('월')
+plt.ylabel('고객수')
+plt.xticks(month_customer_df.index+1)  # x 축에 월 표시
+plt.grid(True)
 
 # 각 도시에 대한 고객 분포 시각화
+customer_location_df = customer_onlinesales_df[['고객지역_California', '고객지역_Chicago', '고객지역_New Jersey', '고객지역_New York', '고객지역_Washington DC']]
+plt.subplot(2, 2, 4)
 customer_location_df.sum().plot(kind='bar')
 plt.title('고객 지역별 분포')
 plt.xlabel('고객 지역')
 plt.ylabel('고객 수')
-plt.xticks(rotation=45)
+plt.xticks(rotation=25)
+
+plt.tight_layout()  # 서브플롯 간 간격 조정
 plt.show()
