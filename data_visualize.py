@@ -27,23 +27,7 @@ engine,query = data_output.db_pull_out("*","marketing_info", sql_pswd)
 marketing_df = pd.read_sql(query, engine)
 engine,query = data_output.db_pull_out("*","onlinesales_info", sql_pswd)
 onlisesales_df = pd.read_sql(query, engine)
-""""
-# 2테이블 결합
-#할인정보 판매정보 결합
-engine,query = data_output.db_group_2column("*","discount_info", "onlinesales_info", "월", "제품카테고리", sql_pswd)
-discount_onlinesales_df = pd.read_sql(query, engine)
-# 마케팅정보 판매정보 결합
-engine,query = data_output.db_group_1column("*","marketing_info", "onlinesales_info", "날짜", sql_pswd)
-marketing_onlinesales_df = pd.read_sql(query, engine)
 
-# 추가 세부자료
-# 고객지역별 구매정보
-engine,query = data_output.db_group_1column("customer_info.고객지역, COUNT(*)AS 고객_수, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
-                                            ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
-                                            ,"GROUP BY customer_info.고객지역 ORDER BY 고객지역 DESC, 구매금액 DESC")
-local_df = pd.read_sql(query, engine)
-
-"""
 
 # 카테고리 목록, 지역 목록
 categories = ["Nest-USA","Office","Apparel","Drinkware","Notebooks & Journals","Waze","Fun","Headgear","Lifestyle","Nest-Canada","Bags",
@@ -118,6 +102,11 @@ engine,query = data_output.db_group_2column("""onlinesales_info.제품카테고�
                                             , "discount_info","onlinesales_info","월","제품카테고리", sql_pswd
                                             ,"GROUP BY onlinesales_info.제품카테고리, discount_info.`할인율`")
 rate_discount_df = pd.read_sql(query, engine)
+
+# 마케팅정보 판매정보 결합
+engine,query = data_output.db_group_1column("marketing_info.날짜, 오프라인비용, 온라인비용, SUM(수량)AS 수량, SUM(평균금액*수량+배송료)AS 구매금액",
+                                            "marketing_info", "onlinesales_info", "날짜", sql_pswd, "GROUP BY 날짜")
+marketing_onlinesales_df = pd.read_sql(query, engine)
 
 # 분석 결과 시각화
 fig, axes = plt.subplots(2, 2, figsize=(15, 18), gridspec_kw={'height_ratios': [2, 2]}) 
@@ -281,6 +270,8 @@ plt.xticks(rotation=25)
 plt.tight_layout()  # 서브플롯 간 간격 조정
 plt.show()
 
+
+
 # 카테고리별로 할인율에 따른 구매량 시각화
 plt.figure(figsize=(10, 6))
 sns.barplot(x="할인율", y="수량", hue="제품카테고리", data=rate_discount_df)
@@ -354,4 +345,59 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 
 # 그래프 출력
+plt.show()
+
+# 날짜를 인덱스로 설정
+marketing_onlinesales_df.set_index('날짜', inplace=True)
+
+# 그래프 그리기
+plt.figure(figsize=(10, 6))
+
+# 매일의 오프라인 마케팅 비용
+plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['오프라인비용'], label='오프라인비용')
+plt.title('매일의 오프라인 비용')
+plt.xlabel('날짜')
+plt.ylabel('오프라인비용')
+plt.legend()
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.show()
+
+# 그래프 그리기
+plt.figure(figsize=(10, 6))
+
+# 매일의 온라인 마케팅 비용
+plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['온라인비용'], label='온라인 마케팅 비용')
+plt.title('매일의 온라인 마케팅 비용')
+plt.xlabel('날짜')
+plt.ylabel('온라인비용')
+plt.legend()
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.show()
+
+# 그래프 그리기
+plt.figure(figsize=(10, 6))
+
+# 매일의 수량
+plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['수량'], label='수량')
+plt.title('매일의 수량')
+plt.xlabel('날짜')
+plt.ylabel('수량')
+plt.legend()
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.show()
+
+# 그래프 그리기
+plt.figure(figsize=(10, 6))
+
+# 매일의 구매금액
+plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['구매금액'], label='구매금액')
+plt.title('매일의 구매금액')
+plt.xlabel('날짜')
+plt.ylabel('구매금액')
+plt.legend()
+plt.grid(True)
+plt.xticks(rotation=45)
 plt.show()
