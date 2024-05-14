@@ -8,6 +8,23 @@ import data_output
 def all_data():
     sql_pswd = input("SQL 비밀번호를 입력해주세요: ")
 
+    global onlisesales_df
+    global customer_df
+    global marketing_df
+    global discount_df
+    global categories
+    global regions
+    global local_count_df
+    global gender_df
+    global period_customer_df
+    global male_customer_df
+    global female_customer_df
+    global category_df
+    global month_customer_df
+    global customer_onlinesales_df
+    global rate_discount_df
+    global marketing_onlinesales_df
+
     # 데이터프레임 불러오기
     engine,query = data_output.db_pull_out("*","customer_info", sql_pswd)
     customer_df = pd.read_sql(query, engine)
