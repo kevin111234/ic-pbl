@@ -8,22 +8,22 @@ import data_output
 def all_data():
     sql_pswd = input("SQL 비밀번호를 입력해주세요: ")
 
-    global onlisesales_df
-    global customer_df
-    global marketing_df
-    global discount_df
-    global categories
-    global regions
-    global local_count_df
-    global gender_df
-    global period_customer_df
-    global male_customer_df
-    global female_customer_df
-    global category_df
-    global month_customer_df
-    global customer_onlinesales_df
-    global rate_discount_df
-    global marketing_onlinesales_df
+    global customer_df # 소비자정보 기본 데이터
+    global marketing_df # 마케팅정보 기본데이터
+    global discount_df # 할인정보 기본데이터
+    global onlisesales_df # 온라인판매정보 기본데이터
+    global categories # 제품카테고리 목록
+    global regions # 고객지역 목록
+    global local_count_df # 고객지역별 제품카테고리별 구매비율 데이터
+    global gender_df # 성별에 따른 고객 수, 구매금액 및 수량 총계
+    global period_customer_df # 가입기간에 따른 구매금액 및 수량
+    global male_customer_df # 남성의 제품 카테고리별 구매 데이터
+    global female_customer_df # 여성의 제품 카테고리별 구매 데이터
+    global category_df # 제품카테고리별 구매 데이터
+    global month_customer_df # 월별 구매 데이터
+    global customer_onlinesales_df # 고객지역별 구매 데이터(고객지역 데이터 변화)
+    global rate_discount_df # 제품카테고리별 할인율에 따른 쿠폰사용 비율
+    global marketing_onlinesales_df # 마케팅비용 대비 구매 데이터
 
     # 데이터프레임 불러오기
     engine,query = data_output.db_pull_out("*","customer_info", sql_pswd)
