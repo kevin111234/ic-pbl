@@ -109,6 +109,9 @@ engine,query = data_output.db_group_1column("marketing_info.날짜, 오프라인
 marketing_onlinesales_df = pd.read_sql(query, engine)
 
 # 분석 결과 시각화
+
+# 첫번째 창
+# 고객 지역별 상품 구매 비율, 성별에 따른 구매금액, 가입기간별 구매금액 및 구매 수량 그래프를 배치
 fig, axes = plt.subplots(2, 2, figsize=(15, 18), gridspec_kw={'height_ratios': [2, 2]}) 
 
 # 첫 번째 서브플롯: 고객 지역별 상품 구매 비율
@@ -130,7 +133,7 @@ axes[0, 1].set_xlabel("성별")
 axes[0, 1].set_ylabel("구매금액")
 axes[0, 1].set_title("성별에 따른 구매금액 (단위: 억 원)")
 for i, value in enumerate(gender_df["구매금액"]):
-    axes[0, 1].text(i, value + 1, str(round(value/1000000000,3)), ha='center')
+    axes[0, 1].text(i, value + 1, str(round(value/1000000000, 3)), ha='center')
 
 # 세 번째 서브플롯: 가입기간별 구매금액
 axes[1, 0].plot(period_customer_df["가입기간"], period_customer_df["구매금액"], color="blue")
@@ -147,6 +150,9 @@ axes[1, 1].set_title("가입기간별 구매 수량")
 plt.tight_layout()  # 서브플롯 간 간격 조절
 plt.show()
 
+
+# 두번째 창
+# 성별에 따른 구매 수량, 구매금액, 평균 수량 및 평균 구매 금액을 나타내는 그래프를 배치
 # 성별에 따른 평균 구매 수량
 categories = male_customer_df["제품카테고리"]
 
@@ -160,7 +166,6 @@ average_quantity_female = female_customer_df["평균수량"]
 average_purchase_amount_male = male_customer_df["평균구매액"]
 average_purchase_amount_female = female_customer_df["평균구매액"]
 
-# 서브플롯 설정
 fig, axes = plt.subplots(2, 2, figsize=(15, 10))
 
 # 수량 그래프
@@ -198,7 +203,29 @@ axes[1, 1].tick_params(axis='x', rotation=90)  # x축 라벨 90도 회전
 plt.tight_layout()
 plt.show()
 
-# 카테고리별 시장규모 시각화
+
+
+
+# 세번째 창
+# 카테고리별 시장규모, 월별 판매량, 할인율에 따른 구매량 및 마케팅 비용 분석을 나타내는 그래프를 배치
+
+# 데이터프레임을 할인율에 따라 정렬
+rate_discount_df.sort_values(by='할인율', inplace=True)
+
+# 제품 카테고리 리스트
+categories = rate_discount_df['제품카테고리'].unique()
+
+# 할인율 리스트
+discount_rates = rate_discount_df['할인율'].unique()
+
+# 그래프를 그릴 때 사용할 색상
+colors = sns.color_palette("husl", 3)
+
+# 그래프의 각 카테고리별 비율을 누적하여 저장할 리스트
+used_ratio_cumulative = [0] * len(categories)
+not_used_ratio_cumulative = [0] * len(categories)
+clicked_ratio_cumulative = [0] * len(categories)
+
 fig, axes = plt.subplots(2, 2, figsize=(15, 10))
 
 # 수량 그래프
@@ -228,51 +255,7 @@ axes[1, 1].tick_params(axis='x', labelrotation=90)
 plt.tight_layout()
 plt.show()
 
-sns.set_palette("husl")
-# 월별 판매량(수량)
-plt.figure(figsize=(20, 12))
-
-plt.subplot(2, 2, 1)
-plt.plot(month_customer_df.index+1, month_customer_df['수량'], marker='o', linestyle='-', color='tab:blue')
-plt.title('월별 구매량 추이')
-plt.xlabel('월')
-plt.ylabel('구매량')
-plt.xticks(month_customer_df.index+1)  # x 축에 월 표시
-plt.grid(True)
-
-# 월별 판매량(금액)
-plt.subplot(2, 2, 2)
-plt.plot(month_customer_df.index+1, month_customer_df['구매금액'], marker='o', linestyle='-', color='tab:orange')
-plt.title('월별 구매금액 추이')
-plt.xlabel('월')
-plt.ylabel('구매금액')
-plt.xticks(month_customer_df.index+1)  # x 축에 월 표시
-plt.grid(True)
-
-# 월별 판매량(이용 고객 수)
-plt.subplot(2, 2, 3)
-plt.plot(month_customer_df.index+1, month_customer_df['고객수'], marker='o', linestyle='-', color='tab:green')
-plt.title('월별 이용자 추이')
-plt.xlabel('월')
-plt.ylabel('고객수')
-plt.xticks(month_customer_df.index+1)  # x 축에 월 표시
-plt.grid(True)
-
-# 각 도시에 대한 고객 분포 시각화
-customer_location_df = customer_onlinesales_df[['고객지역_California', '고객지역_Chicago', '고객지역_New Jersey', '고객지역_New York', '고객지역_Washington DC']]
-plt.subplot(2, 2, 4)
-customer_location_df.sum().plot(kind='bar')
-plt.title('고객 지역별 분포')
-plt.xlabel('고객 지역')
-plt.ylabel('고객 수')
-plt.xticks(rotation=25)
-
-plt.tight_layout()  # 서브플롯 간 간격 조정
-plt.show()
-
-
-
-# 카테고리별로 할인율에 따른 구매량 시각화
+# 할인율에 따른 구매량 시각화
 plt.figure(figsize=(10, 6))
 sns.barplot(x="할인율", y="수량", hue="제품카테고리", data=rate_discount_df)
 plt.title('카테고리별 할인율에 따른 구매량')
@@ -282,122 +265,64 @@ plt.legend(title='제품카테고리')
 plt.xticks()
 plt.show()
 
-# 데이터프레임을 할인율에 따라 정렬
-rate_discount_df.sort_values(by='할인율', inplace=True)
-
-# 제품 카테고리 리스트
-categories = rate_discount_df['제품카테고리'].unique()
-
-# 할인율 리스트
-discount_rates = rate_discount_df['할인율'].unique()
-
-# 그래프를 그릴 때 사용할 색상
-colors = sns.color_palette("husl", 3)
-
-# 그래프의 각 카테고리별 비율을 누적하여 저장할 리스트
-used_ratio_cumulative = [0] * len(categories)
-not_used_ratio_cumulative = [0] * len(categories)
-clicked_ratio_cumulative = [0] * len(categories)
-
-
-# 모든 카테고리를 포함한 새로운 데이터 프레임 생성
-new_rate_discount_df = pd.DataFrame()
-for category in categories:
-    category_data = rate_discount_df[rate_discount_df['제품카테고리'] == category]
-    # 해당 카테고리에 해당하는 데이터가 없는 경우 0으로 채워줌
-    if category_data.empty:
-        category_data = pd.DataFrame({'제품카테고리': [category], '할인율': [0], '구매금액': [0]})
-    new_rate_discount_df = pd.concat([new_rate_discount_df, category_data])
-
-# 새로운 데이터 프레임에서 할인율에 따라 다시 정렬
-rate_discount_df = new_rate_discount_df.sort_values(by='할인율')
-
-# 그래프를 그릴 준비
+# 카테고리별 할인율에 따른 누적 비중과 구매금액에 따른 비율
 plt.figure(figsize=(12, 8))
-
-# 각 할인율에 대해 그래프를 그림
 for i, rate in enumerate(discount_rates):
-    # 해당 할인율에 해당하는 데이터만 추출
     data = rate_discount_df[rate_discount_df['할인율'] == rate]
-    
-    # used_ratio를 누적하여 저장
     used_ratio_cumulative += data['used_ratio']
-    
-    # not_used_ratio를 누적하여 저장
     not_used_ratio_cumulative += data['not_used_ratio']
-    
-    # clicked_ratio를 누적하여 저장
     clicked_ratio_cumulative += data['clicked_ratio']
-    
-    # 막대 그래프를 그림
     plt.bar(categories, used_ratio_cumulative, label='used_ratio' if i == 0 else None, color=colors[0], alpha=0.5)
     plt.bar(categories, not_used_ratio_cumulative, label='not_used_ratio' if i == 0 else None, bottom=used_ratio_cumulative, color=colors[1], alpha=0.5)
     plt.bar(categories, clicked_ratio_cumulative, label='clicked_ratio' if i == 0 else None, bottom=used_ratio_cumulative+not_used_ratio_cumulative, color=colors[2], alpha=0.5)
 
-# 구매금액에 따른 비율을 꺾은선 그래프로 표시
-
-# 그래프 설정
 plt.title('제품 카테고리별 할인율에 따른 누적 비중과 구매금액에 따른 비율')
 plt.xlabel('제품 카테고리')
 plt.ylabel('누적 비중 / 구매금액')
 plt.legend(title='비율 종류')
-plt.xticks(rotation=45)
+plt.xticks(rotation=90)
 plt.tight_layout()
-
-# 그래프 출력
 plt.show()
 
-# 날짜를 인덱스로 설정
-marketing_onlinesales_df.set_index('날짜', inplace=True)
+# 네번째 장
 
-# 그래프 그리기
-plt.figure(figsize=(10, 6))
+fig, axes = plt.subplots(2, 2, figsize=(20, 12))
 
 # 매일의 오프라인 마케팅 비용
-plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['오프라인비용'], label='오프라인비용')
-plt.title('매일의 오프라인 비용')
-plt.xlabel('날짜')
-plt.ylabel('오프라인비용')
-plt.legend()
-plt.grid(True)
-plt.xticks(rotation=45)
-plt.show()
-
-# 그래프 그리기
-plt.figure(figsize=(10, 6))
+axes[0, 0].bar(marketing_onlinesales_df.index, marketing_onlinesales_df['오프라인비용'], label='오프라인비용')
+axes[0, 0].set_title('매일의 오프라인 비용')
+axes[0, 0].set_xlabel('날짜')
+axes[0, 0].set_ylabel('오프라인비용')
+axes[0, 0].legend()
+axes[0, 0].grid(True)
+axes[0, 0].tick_params(axis='x', rotation=45)
 
 # 매일의 온라인 마케팅 비용
-plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['온라인비용'], label='온라인 마케팅 비용',color='tab:purple')
-plt.title('매일의 온라인 마케팅 비용')
-plt.xlabel('날짜')
-plt.ylabel('온라인비용')
-plt.legend()
-plt.grid(True)
-plt.xticks(rotation=45)
-plt.show()
-
-# 그래프 그리기
-plt.figure(figsize=(10, 6))
+axes[0, 1].bar(marketing_onlinesales_df.index, marketing_onlinesales_df['온라인비용'], label='온라인 마케팅 비용', color='tab:purple')
+axes[0, 1].set_title('매일의 온라인 마케팅 비용')
+axes[0, 1].set_xlabel('날짜')
+axes[0, 1].set_ylabel('온라인비용')
+axes[0, 1].legend()
+axes[0, 1].grid(True)
+axes[0, 1].tick_params(axis='x', rotation=45)
 
 # 매일의 수량
-plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['수량'], label='수량',color='tab:orange')
-plt.title('매일의 수량')
-plt.xlabel('날짜')
-plt.ylabel('수량')
-plt.legend()
-plt.grid(True)
-plt.xticks(rotation=45)
-plt.show()
-
-# 그래프 그리기
-plt.figure(figsize=(10, 6))
+axes[1, 0].bar(marketing_onlinesales_df.index, marketing_onlinesales_df['수량'], label='수량', color='tab:orange')
+axes[1, 0].set_title('매일의 수량')
+axes[1, 0].set_xlabel('날짜')
+axes[1, 0].set_ylabel('수량')
+axes[1, 0].legend()
+axes[1, 0].grid(True)
+axes[1, 0].tick_params(axis='x', rotation=45)
 
 # 매일의 구매금액
-plt.bar(marketing_onlinesales_df.index, marketing_onlinesales_df['구매금액'], label='구매금액',color='tab:blue')
-plt.title('매일의 구매금액')
-plt.xlabel('날짜')
-plt.ylabel('구매금액')
-plt.legend()
-plt.grid(True)
-plt.xticks(rotation=45)
+axes[1, 1].bar(marketing_onlinesales_df.index, marketing_onlinesales_df['구매금액'], label='구매금액', color='tab:blue')
+axes[1, 1].set_title('매일의 구매금액')
+axes[1, 1].set_xlabel('날짜')
+axes[1, 1].set_ylabel('구매금액')
+axes[1, 1].legend()
+axes[1, 1].grid(True)
+axes[1, 1].tick_params(axis='x', rotation=45)
+
+plt.tight_layout()
 plt.show()
