@@ -201,7 +201,7 @@ fig, axes = plt.subplots(2, 2, figsize=(20, 12))
 
 # 매일의 오프라인 마케팅 비용
 axes[0, 0].bar(data_frame.marketing_onlinesales_df.index, data_frame.marketing_onlinesales_df['오프라인비용'], label='오프라인비용')
-axes[0, 0].set_title('매일의 오프라인 비용')
+axes[0, 0].set_title('오프라인 비용')
 axes[0, 0].set_xlabel('날짜')
 axes[0, 0].set_ylabel('오프라인비용')
 axes[0, 0].legend()
@@ -209,8 +209,8 @@ axes[0, 0].grid(True)
 axes[0, 0].tick_params(axis='x', rotation=45)
 
 # 매일의 온라인 마케팅 비용
-axes[0, 1].bar(data_frame.marketing_onlinesales_df.index, data_frame.marketing_onlinesales_df['온라인비용'], label='온라인 마케팅 비용', color='tab:purple')
-axes[0, 1].set_title('매일의 온라인 마케팅 비용')
+axes[0, 1].bar(data_frame.marketing_onlinesales_df.index, data_frame.marketing_onlinesales_df['온라인비용'], label='온라인비용', color='tab:purple')
+axes[0, 1].set_title('온라인 비용')
 axes[0, 1].set_xlabel('날짜')
 axes[0, 1].set_ylabel('온라인비용')
 axes[0, 1].legend()
@@ -219,7 +219,7 @@ axes[0, 1].tick_params(axis='x', rotation=45)
 
 # 매일의 수량
 axes[1, 0].bar(data_frame.marketing_onlinesales_df.index, data_frame.marketing_onlinesales_df['수량'], label='수량', color='tab:orange')
-axes[1, 0].set_title('매일의 수량')
+axes[1, 0].set_title('판매 수량')
 axes[1, 0].set_xlabel('날짜')
 axes[1, 0].set_ylabel('수량')
 axes[1, 0].legend()
@@ -227,8 +227,8 @@ axes[1, 0].grid(True)
 axes[1, 0].tick_params(axis='x', rotation=45)
 
 # 매일의 구매금액
-axes[1, 1].bar(data_frame.marketing_onlinesales_df.index, data_frame.marketing_onlinesales_df['구매금액'], label='구매금액', color='tab:blue')
-axes[1, 1].set_title('매일의 구매금액')
+axes[1, 1].bar(data_frame.marketing_onlinesales_df.index, data_frame.marketing_onlinesales_df['구매금액'], label='금액', color='tab:blue')
+axes[1, 1].set_title('판매 금액')
 axes[1, 1].set_xlabel('날짜')
 axes[1, 1].set_ylabel('구매금액')
 axes[1, 1].legend()

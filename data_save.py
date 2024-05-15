@@ -131,7 +131,8 @@ def insert_data(dataframe,df_name,sql_pswd):
         cursor.executemany(df_save, args)
         conn.commit()
         # 커밋 후 연결 종료
-        
+        cursor.close()
+        conn.close()
 
         #데이터베이스 연결에서 오류가 발생했을 때
         #print("데이터베이스에 연결할 수 없습니다.")
