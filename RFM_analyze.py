@@ -1,12 +1,15 @@
-import data_frame
-
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import data_frame
 
+# 데이터 로드
 data_frame.all_data()
 RFM_df = data_frame.customer_onlinesales_all_df
 RFM_df["날짜"]= pd.to_datetime(RFM_df['날짜'])
+
+# 컬럼명 확인
+print(RFM_df.columns)
 
 # Recency 계산
 today_date = RFM_df['날짜'].max() + pd.Timedelta(days=1)
