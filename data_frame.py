@@ -24,6 +24,7 @@ def all_data():
     global customer_onlinesales_df # 고객지역별 구매 데이터(고객지역 데이터 변화)
     global rate_discount_df # 제품카테고리별 할인율에 따른 쿠폰사용 비율
     global marketing_onlinesales_df # 마케팅비용 대비 구매 데이터
+    global customer_onlinesales_all_df # 고객 구매정보 종합 데이터
 
     # 데이터프레임 불러오기
     engine,query = data_output.db_pull_out("*","customer_info", sql_pswd)
@@ -114,3 +115,8 @@ def all_data():
     engine,query = data_output.db_group_1column("marketing_info.날짜, 오프라인비용, 온라인비용, SUM(수량)AS 수량, SUM(평균금액*수량+배송료)AS 구매금액",
                                                 "marketing_info", "onlinesales_info", "날짜", sql_pswd, "GROUP BY 날짜")
     marketing_onlinesales_df = pd.read_sql(query, engine)
+
+    # 고객정보 판매정보 결합
+    engine,query = data_output.db_group_1column("customer_info.고객ID, 날짜, (평균금액*수량+배송료)AS 구매금액",
+                                                "customer_info", "onlinesales_info", "고객ID", sql_pswd)
+    customer_onlinesales_all_df = pd.read_sql(query, engine)
