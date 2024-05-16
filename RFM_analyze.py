@@ -1,7 +1,16 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
+
 import data_frame
+
+# 한글 폰트 경로 설정
+font_path = "GmarketSansTTFMedium.ttf"  # 사용하고자 하는 한글 폰트 경로로 변경
+# 폰트 설정
+font_name = font_manager.FontProperties(fname=font_path).get_name()
+rc('font', family=font_name)
+plt.rcParams.update({'font.size': 10})
 
 # 데이터 로드
 data_frame.all_data()
@@ -77,8 +86,7 @@ plt.show()
 
 # 카테고리별 RFM 분석
 category_rfm = RFM_df.groupby(['제품카테고리', '고객ID']).agg({
-    '날짜': 'max',
-    '고객ID': 'count',
+    '날짜': lambda date: (today_date - date.max()).days,
     '구매금액': 'sum'
 }).reset_index()
 
