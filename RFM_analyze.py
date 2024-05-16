@@ -18,14 +18,11 @@ RFM_df = data_frame.customer_onlinesales_all_df
 RFM_df["날짜"]= pd.to_datetime(RFM_df['날짜'])
 
 # 컬럼명 확인
-print(RFM_df.columns)
-
-# Recency 계산
-today_date = RFM_df['날짜'].max() + pd.Timedelta(days=1)
+print(RFM_df)
 
 # RFM 분석을 위한 그룹화
 recency_df = RFM_df.groupby('고객ID')['날짜'].max().reset_index()
-recency_df['Recency'] = (today_date - recency_df['날짜']).dt.days
+recency_df['Recency'] = (recency_df['날짜'].max() - recency_df['날짜']).dt.days
 
 frequency_df = RFM_df.groupby('고객ID')['날짜'].count().reset_index()
 frequency_df.rename(columns={'날짜': 'Frequency'}, inplace=True)
@@ -85,25 +82,4 @@ plt.ylabel('RFM Score')
 plt.show()
 
 # 카테고리별 RFM 분석
-category_rfm = RFM_df.groupby(['제품카테고리', '고객ID']).agg({
-    '날짜': lambda date: (today_date - date.max()).days,
-    '구매금액': 'sum'
-}).reset_index()
-
-category_rfm.columns = ['제품카테고리', '고객ID', 'LastPurchaseDate', 'Frequency', 'Monetary']
-category_rfm['Recency'] = (today_date - category_rfm['LastPurchaseDate']).dt.days
-
-category_rfm['R_Score'] = pd.qcut(category_rfm['Recency'], 5, labels=[5, 4, 3, 2, 1])
-category_rfm['F_Score'] = pd.qcut(category_rfm['Frequency'].rank(method='first'), 5, labels=[1, 2, 3, 4, 5])
-category_rfm['M_Score'] = pd.qcut(category_rfm['Monetary'], 5, labels=[1, 2, 3, 4, 5])
-
-category_rfm['RFM_Segment'] = category_rfm['R_Score'].astype(str) + category_rfm['F_Score'].astype(str) + category_rfm['M_Score'].astype(str)
-category_rfm['RFM_Score'] = category_rfm[['R_Score', 'F_Score', 'M_Score']].sum(axis=1)
-
-# 카테고리별 RFM Score 분포 시각화
-plt.figure(figsize=(12, 6))
-sns.boxplot(x='제품카테고리', y='RFM_Score', data=category_rfm)
-plt.title('RFM Score Distribution by Product Category')
-plt.xlabel('Product Category')
-plt.ylabel('RFM Score')
-plt.show()
+print(data_frame.category_df)
