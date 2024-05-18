@@ -50,13 +50,13 @@ for i, value in enumerate(data_frame.gender_df["구매금액"]):
 axes[1, 0].plot(data_frame.period_customer_df["가입기간"], data_frame.period_customer_df["구매금액"], color="blue")
 axes[1, 0].set_xlabel("가입기간")
 axes[1, 0].set_ylabel("구매금액")
-axes[1, 0].set_title("가입기간별 구매금액")
+axes[1, 0].set_title("가입기간별 평균 구매금액")
 
 # 네 번째 서브플롯: 가입기간별 구매 수량
 axes[1, 1].plot(data_frame.period_customer_df["가입기간"], data_frame.period_customer_df["수량"], color="green")
 axes[1, 1].set_xlabel("가입기간")
 axes[1, 1].set_ylabel("구매 수량")
-axes[1, 1].set_title("가입기간별 구매 수량")
+axes[1, 1].set_title("가입기간별 평균 구매 수량")
 
 plt.tight_layout()  # 서브플롯 간 간격 조절
 plt.show()

@@ -62,7 +62,7 @@ def all_data():
 
     # 3. 가입기간별 구입추이 경향 파악
     # 가입기간별 카테고리 구매정보
-    engine,query = data_output.db_group_1column("customer_info.가입기간, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+    engine,query = data_output.db_group_1column("customer_info.가입기간, SUM(평균금액*수량+배송료)/COUNT(*)AS 구매금액, SUM(수량)/COUNT(*)AS 수량"
                                                 ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                                 ,"GROUP BY customer_info.가입기간 ORDER BY 가입기간 ASC")
     period_customer_df = pd.read_sql(query, engine)
