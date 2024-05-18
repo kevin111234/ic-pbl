@@ -119,6 +119,47 @@ plt.show()
 
 # 세번째 창
 # 카테고리별 시장규모, 월별 판매량, 할인율에 따른 구매량 및 마케팅 비용 분석을 나타내는 그래프를 배치
+# 월별 판매량(수량)
+sns.set_palette("husl")
+plt.figure(figsize=(20, 12))
+
+plt.subplot(2, 2, 1)
+plt.plot(data_frame.month_customer_df.index+1, data_frame.month_customer_df['수량'], marker='o', linestyle='-', color='tab:blue')
+plt.title('월별 구매량 추이')
+plt.xlabel('월')
+plt.ylabel('구매량')
+plt.xticks(data_frame.month_customer_df.index+1)  # x 축에 월 표시
+plt.grid(True)
+
+# 월별 판매량(금액)
+plt.subplot(2, 2, 2)
+plt.plot(data_frame.month_customer_df.index+1, data_frame.month_customer_df['구매금액'], marker='o', linestyle='-', color='tab:orange')
+plt.title('월별 구매금액 추이')
+plt.xlabel('월')
+plt.ylabel('구매금액')
+plt.xticks(data_frame.month_customer_df.index+1)  # x 축에 월 표시
+plt.grid(True)
+
+# 월별 판매량(이용 고객 수)
+plt.subplot(2, 2, 3)
+plt.plot(data_frame.month_customer_df.index+1, data_frame.month_customer_df['고객수'], marker='o', linestyle='-', color='tab:green')
+plt.title('월별 이용자 추이')
+plt.xlabel('월')
+plt.ylabel('고객수')
+plt.xticks(data_frame.month_customer_df.index+1)  # x 축에 월 표시
+plt.grid(True)
+
+# 각 도시에 대한 고객 분포 시각화
+customer_location_df = data_frame.customer_onlinesales_df[['고객지역_California', '고객지역_Chicago', '고객지역_New Jersey', '고객지역_New York', '고객지역_Washington DC']]
+plt.subplot(2, 2, 4)
+customer_location_df.sum().plot(kind='bar')
+plt.title('고객 지역별 분포')
+plt.xlabel('고객 지역')
+plt.ylabel('고객 수')
+plt.xticks(rotation=25)
+
+plt.tight_layout()  # 서브플롯 간 간격 조정
+plt.show()
 
 # 데이터프레임을 할인율에 따라 정렬
 data_frame.rate_discount_df.sort_values(by='할인율', inplace=True)
