@@ -5,8 +5,7 @@ import seaborn as sns
 
 import data_output
 
-def all_data():
-    sql_pswd = input("SQL 비밀번호를 입력해주세요: ")
+def all_data(sql_pswd):
 
     global customer_df # 소비자정보 기본 데이터
     global marketing_df # 마케팅정보 기본데이터

@@ -97,7 +97,7 @@ def sql_setting(sql_pswd):
                             passwd=db_password, 
                             host=db_host, 
                             db=db_name, 
-                            charset='utf8')
+                            charset='utf8mb4')
     # 커서 생성
     cursor = conn.cursor()
     return conn,cursor

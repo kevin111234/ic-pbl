@@ -17,7 +17,8 @@ font_name = font_manager.FontProperties(fname=font_path).get_name()
 rc('font', family=font_name)
 plt.rcParams.update({'font.size': 10})
 
-data_frame.all_data()
+sql_pswd = input("SQL 비밀번호를 입력해주세요: ")
+data_frame.all_data(sql_pswd)
 
 # 분석 결과 시각화
 
