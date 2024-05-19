@@ -80,26 +80,44 @@ print(segment_counts)
 # 고객 정보 데이터프레임에 세그먼트 추가
 customer_segment_info = RFM_df[['고객ID', '성별', '고객지역']].drop_duplicates()
 customer_segment_info = customer_segment_info.merge(rfm_table[['고객ID', '고객분류']], on='고객ID', how='left')
+customer_info = customer_segment_info.merge(data_frame.customer_df[['고객ID', '가입기간']], on='고객ID', how='left')
+customer_info=customer_info[["고객ID", "성별","고객지역","가입기간","고객분류"]]
 
-# 각 세그먼트별 고객 수 시각화
-plt.figure(figsize=(12, 6))
-sns.countplot(y='고객분류', data=customer_segment_info, order=customer_segment_info['고객분류'].value_counts().index)
+plt.figure(figsize=(20, 10))
+
+# 첫 번째 서브플롯: 고객 수 시각화
+plt.subplot(2, 2, 1)
+sns.countplot(y='고객분류', data=customer_segment_info, palette='pastel')
 plt.title('Customer Distribution by RFM Segments')
 plt.xlabel('고객 수')
 plt.ylabel('RFM Segment')
+
+# 두 번째 서브플롯: 세그먼트별 성별 분포 시각화
+plt.subplot(2, 2, 2)
+sns.countplot(x='고객분류', hue='성별', data=customer_info, palette='Set2')
+plt.title('Gender Distribution by Customer Segment')
+plt.xlabel('Customer Segment')
+plt.ylabel('Count')
+plt.legend(title='Gender')
+
+# 세 번째 서브플롯: 세그먼트별 지역 분포 시각화
+plt.subplot(2, 2, 3)
+sns.countplot(x='고객지역', hue='고객분류', data=customer_info, palette='Set3')
+plt.title('Region Distribution by Customer Segment')
+plt.xlabel('Region')
+plt.ylabel('Count')
+plt.legend(title='Customer Segment')
+plt.xticks(rotation=45)
+
+# 네 번째 서브플롯: 세그먼트별 가입기간 분포 시각화
+plt.subplot(2, 2, 4)
+sns.boxplot(x='고객분류', y='가입기간', data=customer_info, palette='husl')
+plt.title('Membership Duration Distribution by Customer Segment')
+plt.xlabel('Customer Segment')
+plt.ylabel('Membership Duration')
+plt.xticks(rotation=45)
+
+plt.tight_layout()
 plt.show()
-
-# RFM Score 분포 시각화
-plt.figure(figsize=(12, 6))
-sns.histplot(rfm_table['RFM_Score'], bins=20, kde=True)
-plt.title('RFM Score Distribution')
-plt.xlabel('RFM Score')
-plt.ylabel('Frequency')
-plt.show()
-
-customer_info = customer_segment_info.merge(data_frame.customer_df[['고객ID', '가입기간']], on='고객ID', how='left')
-
-customer_info=customer_info[["고객ID", "성별","고객지역","가입기간","고객분류"]]
-print(customer_info)
 
 data_save.save_to_db(customer_info, "customer", sql_pswd)
