@@ -5,8 +5,7 @@ import seaborn as sns
 
 import data_output
 
-def all_data():
-    sql_pswd = input("SQL 비밀번호를 입력해주세요: ")
+def all_data(sql_pswd):
 
     global customer_df # 소비자정보 기본 데이터
     global marketing_df # 마케팅정보 기본데이터
@@ -62,7 +61,7 @@ def all_data():
 
     # 3. 가입기간별 구입추이 경향 파악
     # 가입기간별 카테고리 구매정보
-    engine,query = data_output.db_group_1column("customer_info.가입기간, SUM(평균금액*수량+배송료)AS 구매금액, SUM(수량)AS 수량"
+    engine,query = data_output.db_group_1column("customer_info.가입기간, SUM(평균금액*수량+배송료)/COUNT(*)AS 구매금액, SUM(수량)/COUNT(*)AS 수량"
                                                 ,"customer_info", "onlinesales_info", "고객ID", sql_pswd
                                                 ,"GROUP BY customer_info.가입기간 ORDER BY 가입기간 ASC")
     period_customer_df = pd.read_sql(query, engine)
@@ -117,6 +116,6 @@ def all_data():
     marketing_onlinesales_df = pd.read_sql(query, engine)
 
     # 고객정보 판매정보 결합
-    engine,query = data_output.db_group_1column("customer_info.고객ID, 날짜, (평균금액*수량+배송료)AS 구매금액",
+    engine,query = data_output.db_group_1column("customer_info.고객ID, 성별, 고객지역, 날짜, 제품카테고리, (평균금액*수량+배송료)AS 구매금액",
                                                 "customer_info", "onlinesales_info", "고객ID", sql_pswd)
     customer_onlinesales_all_df = pd.read_sql(query, engine)
