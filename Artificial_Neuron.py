@@ -6,6 +6,7 @@ from sklearn.metrics import confusion_matrix
 import tensorflow as tf
 import keras
 import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
 import seaborn as sns
 
 import data_frame
