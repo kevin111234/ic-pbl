@@ -24,19 +24,19 @@ sql 쿼리와 데이터베이스에 저장하는 함수까지 구현완료.
 
 ## data_frame.py
 데이터프레임으로 데이터 다 가져와주는 함수
-customer_df # 소비자정보 기본 데이터
-marketing_df # 마케팅정보 기본데이터
-discount_df # 할인정보 기본데이터
-onlisesales_df # 온라인판매정보 기본데이터
-categories # 제품카테고리 목록
-regions # 고객지역 목록
-local_count_df # 고객지역별 제품카테고리별 구매비율 데이터
-gender_df # 성별에 따른 고객 수, 구매금액 및 수량 총계
-period_customer_df # 가입기간에 따른 구매금액 및 수량
-male_customer_df # 남성의 제품 카테고리별 구매 데이터
-female_customer_df # 여성의 제품 카테고리별 구매 데이터
-category_df # 제품카테고리별 구매 데이터
-month_customer_df # 월별 구매 데이터
-customer_onlinesales_df # 고객지역별 구매 데이터(고객지역 데이터 변화)
-rate_discount_df # 제품카테고리별 할인율에 따른 쿠폰사용 비율
-marketing_onlinesales_df # 마케팅비용 대비 구매 데이터
+- customer_df # 소비자정보 기본 데이터
+- marketing_df # 마케팅정보 기본데이터
+- discount_df # 할인정보 기본데이터
+- onlisesales_df # 온라인판매정보 기본데이터
+- categories # 제품카테고리 목록
+- regions # 고객지역 목록
+- local_count_df # 고객지역별 제품카테고리별 구매비율 데이터
+- gender_df # 성별에 따른 고객 수, 구매금액 및 수량 총계
+- period_customer_df # 가입기간에 따른 구매금액 및 수량
+- male_customer_df # 남성의 제품 카테고리별 구매 데이터
+- female_customer_df # 여성의 제품 카테고리별 구매 데이터
+- category_df # 제품카테고리별 구매 데이터
+- month_customer_df # 월별 구매 데이터
+- customer_onlinesales_df # 고객지역별 구매 데이터(고객지역 데이터 변화)
+- rate_discount_df # 제품카테고리별 할인율에 따른 쿠폰사용 비율
+- marketing_onlinesales_df # 마케팅비용 대비 구매 데이터
