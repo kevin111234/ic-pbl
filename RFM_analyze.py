@@ -52,23 +52,23 @@ def segment_label(row):
     if r <= 2 and f >= 4 and m >= 4:
         return '챔피언'
     elif f >= 4 and m >= 3:
-        return '충성 고객'
+        return '충성_고객'
     elif r <= 2 and m >= 3:
-        return '잠재적 충성고객'
+        return '잠재적_충성고객'
     elif r <= 2:
-        return '신규 고객'
+        return '신규_고객'
     elif r <= 3 and m >= 2:
-        return '유망 고객'
+        return '유망_고객'
     elif r <= 3 and m < 2:
-        return '관심 필요 고객'
+        return '관심_필요_고객'
     elif r > 3 and f >= 2:
-        return '곧 이탈할 고객'
+        return '곧_이탈할_고객'
     elif r > 4 and m >= 3:
-        return '위험 고객'
+        return '위험_고객'
     elif r > 4 and m < 3:
-        return "휴면 고객"
+        return "휴면_고객"
     else:
-        return '이탈 고객'
+        return '이탈_고객'
 
 rfm_table['고객분류'] = rfm_table.apply(segment_label, axis=1)
 
@@ -78,12 +78,12 @@ segment_counts.columns = ['고객분류', '고객 수']
 print(segment_counts)
 
 # 고객 정보 데이터프레임에 세그먼트 추가
-customer_info = RFM_df[['고객ID', '성별', '고객지역']].drop_duplicates()
-customer_info = customer_info.merge(rfm_table[['고객ID', '고객분류']], on='고객ID', how='left')
+customer_segment_info = RFM_df[['고객ID', '성별', '고객지역']].drop_duplicates()
+customer_segment_info = customer_segment_info.merge(rfm_table[['고객ID', '고객분류']], on='고객ID', how='left')
 
 # 각 세그먼트별 고객 수 시각화
 plt.figure(figsize=(12, 6))
-sns.countplot(y='고객분류', data=customer_info, order=customer_info['고객분류'].value_counts().index)
+sns.countplot(y='고객분류', data=customer_segment_info, order=customer_segment_info['고객분류'].value_counts().index)
 plt.title('Customer Distribution by RFM Segments')
 plt.xlabel('고객 수')
 plt.ylabel('RFM Segment')
@@ -97,4 +97,9 @@ plt.xlabel('RFM Score')
 plt.ylabel('Frequency')
 plt.show()
 
+customer_info = customer_segment_info.merge(data_frame.customer_df[['고객ID', '가입기간']], on='고객ID', how='left')
+
+customer_info=customer_info[["고객ID", "성별","고객지역","가입기간","고객분류"]]
 print(customer_info)
+
+data_save.save_to_db(customer_info, "customer", sql_pswd)
