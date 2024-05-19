@@ -86,22 +86,17 @@ y_test_labels = np.argmax(y_test, axis=1)
 y_pred_labels = np.argmax(y_pred, axis=1)
 
 # 시각화
-plt.figure(figsize=(10, 6))
-sns.heatmap(confusion_matrix(y_test_labels, y_pred_labels), annot=True, fmt='d', cmap='Blues')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-plt.title('Confusion Matrix')
-plt.show()
+fig, axes = plt.subplots(1, 2, figsize=(20, 10))
 
-# 실제 값과 예측 값 비교
+# 혼동 행렬
+sns.heatmap(confusion_matrix(y_test_labels, y_pred_labels), annot=True, fmt='d', cmap='Blues', ax=axes[0])
+axes[0].set_xlabel('Predicted')
+axes[0].set_ylabel('Actual')
+axes[0].set_title('Confusion Matrix')
+
+# 분포 그래프
 comparison_df = pd.DataFrame({'Actual': y_test_labels, 'Predicted': y_pred_labels})
-
-plt.figure(figsize=(10, 6))
-sns.countplot(x='Actual', data=comparison_df, palette='viridis')
-plt.title('Distribution of Actual RFM Scores')
-plt.show()
-
-plt.figure(figsize=(10, 6))
-sns.countplot(x='Predicted', data=comparison_df, palette='viridis')
-plt.title('Distribution of Predicted RFM Scores')
+sns.countplot(x='Actual', data=comparison_df, hue='Actual', palette='viridis', ax=axes[1], legend=False)
+axes[1].set_title('Distribution of Actual RFM Scores')
+plt.tight_layout()
 plt.show()
