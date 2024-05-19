@@ -85,6 +85,14 @@ customer_info=customer_info[["고객ID", "성별","고객지역","가입기간",
 
 plt.figure(figsize=(20, 10))
 
+# RFM Score 분포 시각화
+plt.figure(figsize=(12, 6))
+sns.histplot(rfm_table['RFM_Score'], bins=20, kde=True)
+plt.title('RFM Score Distribution')
+plt.xlabel('RFM Score')
+plt.ylabel('Frequency')
+plt.show()
+
 # 첫 번째 서브플롯: 고객 수 시각화
 plt.subplot(2, 2, 1)
 sns.countplot(y='고객분류', data=customer_segment_info, palette='pastel')

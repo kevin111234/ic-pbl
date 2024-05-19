@@ -1,6 +1,12 @@
 # ic-pbl
 대회용 데이터분석 툴
 
+## Artificial_Neuron.py
+RFM 분석방법을 활용하여 분석한 결과를 바탕으로 RFM 점수 예측하기
+
+## RFM_analyze.py
+RFM 분석방법을 활용하여 점수를 매기고 이를 바탕으로 고객 그룹을 10개로 나눔.
+
 ## data_visualize.py
 sql에서 데이터를 받아와서 이리저리 조합하고 시각화하는 기능까지 구현완료.
 
