@@ -49,15 +49,16 @@ for column in ['제품카테고리', '성별', '고객지역']:
     category_rfm[column] = label_encoders[column].fit_transform(category_rfm[column])
 
 # RFM 점수 계산 (임의로 예시)
-category_rfm['R_Score'] = pd.qcut(category_rfm['Recency'], 5, labels=[5, 4, 3, 2, 1])
-category_rfm['F_Score'] = pd.qcut(category_rfm['Frequency'].rank(method='first'), 5, labels=[1, 2, 3, 4, 5])
-category_rfm['M_Score'] = pd.qcut(category_rfm['Monetary'], 5, labels=[1, 2, 3, 4, 5])
+category_rfm['R_Score'] = pd.qcut(category_rfm['Recency'], q=5, labels=False) + 1
+category_rfm['F_Score'] = pd.qcut(category_rfm['Frequency'].rank(method='first'), q=5, labels=False) + 1
+category_rfm['M_Score'] = pd.qcut(category_rfm['Monetary'], q=5, labels=False) + 1
 category_rfm['RFM_Score'] = category_rfm[['R_Score', 'F_Score', 'M_Score']].sum(axis=1)
 
 # 특성과 타겟 분리
-features = ['제품카테고리', 'Recency', 'Frequency', 'Monetary', '성별', '고객지역']
-X = category_rfm[features].values
-y = category_rfm['RFM_Score'].values
+features_x = ['제품카테고리', 'Recency', 'Frequency', 'Monetary', '성별', '고객지역']
+features_y = ['RFM_Score']
+X = category_rfm[features_x].values
+y = category_rfm[features_y].values
 
 # 데이터 스케일링
 scaler = StandardScaler()
