@@ -55,9 +55,10 @@ category_rfm['M_Score'] = pd.qcut(category_rfm['Monetary'], 5, labels=[1, 2, 3, 
 category_rfm['RFM_Score'] = category_rfm[['R_Score', 'F_Score', 'M_Score']].sum(axis=1)
 
 # 특성과 타겟 분리
-features = ['제품카테고리', 'Recency', 'Frequency', 'Monetary', '성별', '고객지역']
-X = category_rfm[features].values
-y = category_rfm['RFM_Score'].values
+features_x = ['제품카테고리', 'Recency', 'Frequency', 'Monetary', '성별', '고객지역']
+features_y = ['RFM_Score']
+X = category_rfm[features_x].values
+y = category_rfm[features_y].values
 
 # 데이터 스케일링
 scaler = StandardScaler()

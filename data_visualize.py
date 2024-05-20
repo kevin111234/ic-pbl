@@ -279,3 +279,37 @@ axes[1, 1].tick_params(axis='x', rotation=45)
 
 plt.tight_layout()
 plt.show()
+
+# 물가상승정도 확인하기
+earliest_latest_df = data_frame.onlinesales_df.sort_values(by='날짜').groupby('제품ID').agg({
+    '평균금액': ['first', 'last'],
+    '배송료': ['first', 'last'],
+    '날짜': ['first', 'last']
+}).reset_index()
+
+# 컬럼 이름 정리
+earliest_latest_df.columns = ['제품ID', '초기단가', '최종단가', '초기배송료', '최종배송료', '초기날짜', '최종날짜']
+
+# 단가 및 배송료 변동 계산
+earliest_latest_df['단가변동'] = earliest_latest_df['최종단가'] - earliest_latest_df['초기단가']
+earliest_latest_df['배송료변동'] = earliest_latest_df['최종배송료'] - earliest_latest_df['초기배송료']
+
+# 시각화
+fig, axes = plt.subplots(2, 1, figsize=(14, 10))
+
+sns.barplot(x='제품ID', y='단가변동', data=earliest_latest_df, ax=axes[0], palette='viridis')
+axes[0].set_title('제품ID별 단가 변동')
+axes[0].set_xlabel('')
+axes[0].set_xlabel('제품ID')
+axes[0].set_ylabel('단가 변동')
+axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+
+sns.barplot(x='제품ID', y='배송료변동', data=earliest_latest_df, ax=axes[1], palette='viridis')
+axes[1].set_title('제품ID별 배송료 변동')
+axes[0].set_xlabel('')
+axes[1].set_xlabel('제품ID')
+axes[1].set_ylabel('배송료 변동')
+axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+
+plt.tight_layout()
+plt.show()

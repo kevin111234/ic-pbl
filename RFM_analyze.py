@@ -106,6 +106,7 @@ plt.title('Gender Distribution by Customer Segment')
 plt.xlabel('Customer Segment')
 plt.ylabel('Count')
 plt.legend(title='Gender')
+plt.xticks(rotation=45)
 
 # 세 번째 서브플롯: 세그먼트별 지역 분포 시각화
 plt.subplot(2, 2, 3)
