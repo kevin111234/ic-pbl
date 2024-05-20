@@ -10,7 +10,7 @@ def all_data(sql_pswd):
     global customer_df # 소비자정보 기본 데이터
     global marketing_df # 마케팅정보 기본데이터
     global discount_df # 할인정보 기본데이터
-    global onlisesales_df # 온라인판매정보 기본데이터
+    global onlinesales_df # 온라인판매정보 기본데이터
     global categories # 제품카테고리 목록
     global regions # 고객지역 목록
     global local_count_df # 고객지역별 제품카테고리별 구매비율 데이터
@@ -33,7 +33,7 @@ def all_data(sql_pswd):
     engine,query = data_output.db_pull_out("*","marketing_info", sql_pswd)
     marketing_df = pd.read_sql(query, engine)
     engine,query = data_output.db_pull_out("*","onlinesales_info", sql_pswd)
-    onlisesales_df = pd.read_sql(query, engine)
+    onlinesales_df = pd.read_sql(query, engine)
 
 
     # 카테고리 목록, 지역 목록

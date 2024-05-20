@@ -36,9 +36,9 @@ monetary_df.rename(columns={'구매금액': 'Monetary'}, inplace=True)
 rfm_table = recency_df.merge(frequency_df, on='고객ID').merge(monetary_df, on='고객ID')
 
 # RFM 점수 계산 (각 항목별 점수: 1에서 5까지)
-rfm_table['R_Score'] = pd.qcut(rfm_table['Recency'], q=5, labels=[5, 4, 3, 2, 1])
-rfm_table['F_Score'] = pd.qcut(rfm_table['Frequency'].rank(method='first'), q=5, labels=[1, 2, 3, 4, 5])
-rfm_table['M_Score'] = pd.qcut(rfm_table['Monetary'], q=5, labels=[1, 2, 3, 4, 5])
+rfm_table['R_Score'] = pd.qcut(rfm_table['Recency'], q=5, labels=False) + 1
+rfm_table['F_Score'] = pd.qcut(rfm_table['Frequency'].rank(method='first'), q=5, labels=False) + 1
+rfm_table['M_Score'] = pd.qcut(rfm_table['Monetary'], q=5, labels=False) + 1
 
 # RFM 점수 합계
 rfm_table['RFM_Score'] = rfm_table[['R_Score', 'F_Score', 'M_Score']].sum(axis=1)
@@ -49,23 +49,23 @@ def segment_label(row):
     f = int(row['F_Score'])
     m = int(row['M_Score'])
     
-    if r <= 2 and f >= 4 and m >= 4:
+    if r >=4 and f >= 4 and m >= 4:
         return '챔피언'
     elif f >= 4 and m >= 3:
         return '충성_고객'
-    elif r <= 2 and m >= 3:
+    elif r >= 4 and m >= 3:
         return '잠재적_충성고객'
-    elif r <= 2:
+    elif r >= 4:
         return '신규_고객'
-    elif r <= 3 and m >= 2:
+    elif r >= 3 and m >= 2:
         return '유망_고객'
-    elif r <= 3 and m < 2:
+    elif r >= 3 and m < 2:
         return '관심_필요_고객'
-    elif r > 3 and f >= 2:
+    elif r < 3 and f >= 2:
         return '곧_이탈할_고객'
-    elif r > 4 and m >= 3:
+    elif r < 2 and m >= 3:
         return '위험_고객'
-    elif r > 4 and m < 3:
+    elif r < 2 and m < 3:
         return "휴면_고객"
     else:
         return '이탈_고객'
@@ -83,8 +83,6 @@ customer_segment_info = customer_segment_info.merge(rfm_table[['고객ID', '고�
 customer_info = customer_segment_info.merge(data_frame.customer_df[['고객ID', '가입기간']], on='고객ID', how='left')
 customer_info=customer_info[["고객ID", "성별","고객지역","가입기간","고객분류"]]
 
-plt.figure(figsize=(20, 10))
-
 # RFM Score 분포 시각화
 plt.figure(figsize=(12, 6))
 sns.histplot(rfm_table['RFM_Score'], bins=20, kde=True)
@@ -93,6 +91,7 @@ plt.xlabel('RFM Score')
 plt.ylabel('Frequency')
 plt.show()
 
+plt.figure(figsize=(20, 10))
 # 첫 번째 서브플롯: 고객 수 시각화
 plt.subplot(2, 2, 1)
 sns.countplot(y='고객분류', data=customer_segment_info, palette='pastel')
@@ -107,6 +106,7 @@ plt.title('Gender Distribution by Customer Segment')
 plt.xlabel('Customer Segment')
 plt.ylabel('Count')
 plt.legend(title='Gender')
+plt.xticks(rotation=45)
 
 # 세 번째 서브플롯: 세그먼트별 지역 분포 시각화
 plt.subplot(2, 2, 3)
@@ -125,7 +125,10 @@ plt.xlabel('Customer Segment')
 plt.ylabel('Membership Duration')
 plt.xticks(rotation=45)
 
+# Boxplot에 점으로 모든 데이터 표시
+sns.stripplot(x='고객분류', y='가입기간', data=customer_info, color='black', alpha=0.5, jitter=True, palette='husl')
+
 plt.tight_layout()
 plt.show()
 
-data_save.save_to_db(customer_info, "customer", sql_pswd)
+# data_save.save_to_db(customer_info, "customer", sql_pswd)
