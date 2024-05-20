@@ -296,6 +296,9 @@ earliest_latest_df.columns = ['제품ID', '초기단가', '최종단가', '초�
 earliest_latest_df['단가변동'] = earliest_latest_df['최종단가'] - earliest_latest_df['초기단가']
 earliest_latest_df['배송료변동'] = earliest_latest_df['최종배송료'] - earliest_latest_df['초기배송료']
 
+# 구매가 한 번만 이루어진 제품 제외
+filtered_df = earliest_latest_df[(earliest_latest_df['단가변동'] != 0)]
+
 # 시각화
 fig, axes = plt.subplots(2, 1, figsize=(14, 10))
 
