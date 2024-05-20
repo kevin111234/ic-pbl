@@ -281,9 +281,11 @@ plt.tight_layout()
 plt.show()
 
 # 물가상승정도 확인하기
+data_frame.onlinesales_df['단위수량당배송료'] = data_frame.onlinesales_df['배송료'] / data_frame.onlinesales_df['수량']
+
 earliest_latest_df = data_frame.onlinesales_df.sort_values(by='날짜').groupby('제품ID').agg({
     '평균금액': ['first', 'last'],
-    '배송료': ['first', 'last'],
+    '단위수량당배송료': ['first', 'last'],
     '날짜': ['first', 'last']
 }).reset_index()
 
@@ -312,4 +314,26 @@ axes[1].set_ylabel('배송료 변동')
 axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
 plt.tight_layout()
+plt.show()
+
+# 날짜별 평균 단가 및 배송료 계산
+avg_price_shipping_df = data_frame.onlinesales_df.groupby('날짜').agg({
+    '평균금액': 'mean',
+    '단위수량당배송료': 'mean'
+}).reset_index()
+
+# 시각화
+fig, ax = plt.subplots(figsize=(14, 7))
+
+ax.plot(avg_price_shipping_df['날짜'], avg_price_shipping_df['평균금액'], label='평균금액', color='blue')
+ax.set_ylabel('평균금액', color='blue')
+ax.tick_params(axis='y', labelcolor='blue')
+
+ax2 = ax.twinx()
+ax2.plot(avg_price_shipping_df['날짜'], avg_price_shipping_df['단위수량당배송료'], label='단위수량당 배송료', color='red')
+ax2.set_ylabel('단위수량당 배송료', color='red')
+ax2.tick_params(axis='y', labelcolor='red')
+
+plt.title('시간변화에 따른 배송료와 상품금액 변동성')
+fig.tight_layout()
 plt.show()
