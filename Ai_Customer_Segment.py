@@ -178,3 +178,19 @@ for i, col in enumerate(cluster_avg.columns):
 
 plt.tight_layout()
 plt.show()
+
+# 1. 클러스터별 인구 통계학적 정보 분석
+demographic_cols = ['성별', '고객지역']  # 분석할 인구 통계학적 정보 열
+for col in demographic_cols:
+    print(f"\n{col}별 고객 분포:")
+    for cluster in rfm_df_filtered['Cluster'].unique():
+        cluster_data = rfm_df_filtered[rfm_df_filtered['Cluster'] == cluster]
+        print(f"  - Cluster {cluster}: {cluster_data[col].value_counts(normalize=True).round(2)}")
+
+    # 막대 그래프 시각화
+    plt.figure(figsize=(10, 6))
+    rfm_df_filtered.groupby('Cluster')[col].value_counts().unstack().plot(kind='bar', rot=0)
+    plt.title(f'Cluster Distribution by {col}')
+    plt.xlabel('Cluster')
+    plt.ylabel('Count')
+    plt.show()
