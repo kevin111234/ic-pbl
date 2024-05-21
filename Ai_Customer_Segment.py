@@ -3,6 +3,10 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 import numpy as np
 from sklearn.neural_network import MLPRegressor
+from sklearn.model_selection import train_test_split
+from keras import models
+from keras import layers
+from keras import callbacks
 
 import data_frame
 
@@ -56,11 +60,48 @@ rfm_df_filtered.columns = ['고객ID', '최근구매일자', '구매빈도', '�
         'Lifestyle', 'More Bags', 'Nest', 'Nest-Canada', 'Nest-USA',
         'Notebooks & Journals', 'Office', 'Waze', 'AveragePurchaseValue']
 
+# 데이터 정규화
+scaler = MinMaxScaler()
+rfm_df_scaled = scaler.fit_transform(rfm_df_filtered[['최근구매일자', '구매빈도', '총구매금액']])
+
+# 원-핫 인코딩
+encoder = OneHotEncoder()
+encoded_categorical = encoder.fit_transform(rfm_df_filtered[['성별', '고객지역']])
+
 # 인공신경망 모델 구축
 # 오토인코더 모델 활용
+# 1. 데이터 준비
+X = np.hstack((rfm_df_scaled, encoded_categorical.toarray()))  # 특징 행렬 생성
+X_train, X_temp = train_test_split(X, test_size=0.2, random_state=0)
+X_val, X_test = train_test_split(X_temp, test_size=0.5, random_state=0)
 
+# 2. 오토인코더 모델 구축 및 학습
+input_dim = X_train.shape[1]
+encoded_dim = input_dim // 2  # 은닉층 노드 수 설정 (차원 축소)
 
-# 모델 학습
+input_layer = layers.Input(shape=(input_dim,))
+encoded = layers.Dense(encoded_dim, activation='relu')(input_layer)
+decoded = layers.Dense(input_dim, activation='linear')(encoded)
+
+autoencoder = models.Model(input_layer, decoded)
+autoencoder.compile(optimizer='adam', loss='mse')
+
+early_stopping = callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+
+autoencoder.fit(X_train, X_train,
+                epochs=50,
+                batch_size=32,
+                shuffle=True,
+                validation_data=(X_val, X_val),
+                callbacks=[early_stopping])
+
+# 3. 차원 축소
+encoder = models.Model(input_layer, encoded)
+reduced_features_train = encoder.predict(X_train)
+
+# 4. 결과 확인
+print("Reduced features shape:", reduced_features_train.shape)
+
 
 # 고객 세분화
 # K-means 클러스터링 활용
