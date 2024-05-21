@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-from keras import models
-from keras import layers
+from keras import models, layers, callbacks
 from matplotlib import font_manager, rc
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -25,70 +24,72 @@ customer_onlinesales_df = data_frame.customer_onlinesales_df
 # 데이터 전처리
 customer_onlinesales_df['날짜'] = pd.to_datetime(customer_onlinesales_df['날짜'])
 customer_onlinesales_df.set_index('날짜', inplace=True)
-customer_onlinesales_df = customer_onlinesales_df[['고객ID','성별','가입기간','제품ID','제품카테고리','수량','평균금액','배송료','쿠폰상태'
-                                                    ,'고객지역_California','고객지역_Chicago','고객지역_New Jersey','고객지역_New York','고객지역_Washington DC']]
-customer_onlinesales_df.columns=['고객ID','고객ID_x','성별','가입기간','제품ID','제품카테고리','수량','평균금액','배송료','쿠폰상태'
-                                                    ,'고객지역_California','고객지역_Chicago','고객지역_New Jersey','고객지역_New York','고객지역_Washington DC']
-customer_onlinesales_df = customer_onlinesales_df[['고객ID','성별','가입기간','제품ID','제품카테고리','수량','평균금액','배송료','쿠폰상태'
-                                                    ,'고객지역_California','고객지역_Chicago','고객지역_New Jersey','고객지역_New York','고객지역_Washington DC']]
+customer_onlinesales_df = customer_onlinesales_df[['고객ID', '성별', '고객분류', '제품ID', '제품카테고리', '수량', '평균금액', '배송료', '쿠폰상태']]
 customer_onlinesales_df = customer_onlinesales_df.dropna()
 
 # 원-핫 인코딩 실행 후 데이터 병합
-categorical_df = customer_onlinesales_df[['성별','쿠폰상태']] 
-encoded_df = pd.get_dummies(categorical_df) 
+categorical_df = customer_onlinesales_df[['성별', '고객분류', '쿠폰상태']]
+encoded_df = pd.get_dummies(categorical_df)
 encoded_df.index = customer_onlinesales_df.index
 customer_onlinesales_df = pd.concat([customer_onlinesales_df, encoded_df], axis=1)
-customer_onlinesales_df = customer_onlinesales_df.drop(columns=['성별','쿠폰상태'])
-
-print(customer_onlinesales_df)
+customer_onlinesales_df = customer_onlinesales_df.drop(columns=['성별', '고객분류', '쿠폰상태'])
 
 # 일자별 판매량 집계
 daily_sales_df = customer_onlinesales_df.groupby('날짜')['수량'].sum().reset_index()
-print(daily_sales_df)
 
-# 특징 선택 및 스케일링
+# 시계열 데이터를 LSTM 모델 학습에 사용할 수 있는 형태로 변환
+daily_sales_df.set_index('날짜', inplace=True)
 scaler = MinMaxScaler()
-scaled_data = scaler.fit_transform(daily_sales_df[['수량']])
+scaled_data = scaler.fit_transform(daily_sales_df)
 
-# 시계열 데이터 분할
-n_timesteps = 7  # 과거 7일 데이터를 기반으로 예측
-X, y = [], []
-for i in range(n_timesteps, len(scaled_data)):
-    X.append(scaled_data[i-n_timesteps:i, 0])
-    y.append(scaled_data[i, 0])
-X, y = np.array(X), np.array(y)
+# 시계열 데이터를 LSTM 모델의 입력 형태로 변환하는 함수
+def create_sequences(data, sequence_length):
+    xs = []
+    ys = []
+    for i in range(len(data) - sequence_length):
+        x = data[i:i+sequence_length]
+        y = data[i+sequence_length]
+        xs.append(x)
+        ys.append(y)
+    return np.array(xs), np.array(ys)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)  # shuffle=False로 시간 순서 유지
-X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, shuffle=False)  # 60% train, 20% validation, 20% test
+sequence_length = 7  # 예를 들어, 최근 30일의 데이터를 사용하여 다음 날의 판매량을 예측
+X, y = create_sequences(scaled_data, sequence_length)
 
-# 모델 구축
+# LSTM 입력 형태에 맞게 데이터 차원 변경
+X = X.reshape((X.shape[0], X.shape[1], 1))
+
+# 학습 및 테스트 데이터 분리
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# LSTM 모델 정의
 model = models.Sequential()
-model.add(layers.LSTM(units=50, activation='relu', input_shape=(n_timesteps, 1)))
-model.add(layers.Dropout(0.2))  # Overfitting 방지를 위한 Dropout 추가 (선택 사항)
-model.add(layers.Dense(units=1))  # 예측 결과는 1개 (판매량)
+model.add(layers.Input(shape=(sequence_length, 1)))
+model.add(layers.LSTM(100, activation='relu', return_sequences=True))
+model.add(layers.Dropout(0.2))
+model.add(layers.LSTM(50, activation='relu'))
+model.add(layers.Dense(1))
 model.compile(optimizer='adam', loss='mse')
 
+# 조기 종료 콜백 설정
+early_stopping = callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+
 # 모델 학습
-model.fit(X_train, y_train, epochs=50, batch_size=32, validation_data=(X_val, y_val))
+history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2, callbacks=[early_stopping])
 
-# 테스트 데이터 예측
+# 모델 평가
 y_pred = model.predict(X_test)
+y_test_inv = scaler.inverse_transform(y_test.reshape(-1, 1))
+y_pred_inv = scaler.inverse_transform(y_pred)
 
-# 예측 결과를 원래 스케일로 변환
-y_pred = scaler.inverse_transform(y_pred)
-y_test = scaler.inverse_transform(y_test.reshape(-1, 1))  # y_test도 스케일 변환
+# 평가 지표 출력
+mse = mean_squared_error(y_test_inv, y_pred_inv)
+mae = mean_absolute_error(y_test_inv, y_pred_inv)
+print(f'MSE: {mse}, MAE: {mae}')
 
-# 평가
-mse = mean_squared_error(y_test, y_pred)
-mae = mean_absolute_error(y_test, y_pred)
-print(f'MSE: {mse:.2f}, RMSE: {np.sqrt(mse):.2f}, MAE: {mae:.2f}')
-
-# 시각화
-plt.figure(figsize=(10, 6))
-plt.plot(daily_sales_df.index[-len(y_test):], y_test, label='Actual')
-plt.plot(daily_sales_df.index[-len(y_test):], y_pred, label='Predicted')
-plt.title('Daily Sales Prediction')
-plt.xlabel('Date')
-plt.ylabel('Sales')
+# 결과 시각화
+plt.figure(figsize=(12, 6))
+plt.plot(daily_sales_df.index[-len(y_test):], y_test_inv, label='Actual')
+plt.plot(daily_sales_df.index[-len(y_test):], y_pred_inv, label='Predicted')
 plt.legend()
 plt.show()
