@@ -9,9 +9,19 @@ from keras import layers
 from keras import callbacks
 import altair as alt
 from sklearn.cluster import KMeans
-from yellowbrick.cluster import KElbowVisualizer
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+from matplotlib import pyplot as plt
+from matplotlib import font_manager, rc
 
 import data_frame
+
+# 한글 폰트 경로 설정
+font_path = "GmarketSansTTFMedium.ttf"  # 사용하고자 하는 한글 폰트 경로로 변경
+# 폰트 설정
+font_name = font_manager.FontProperties(fname=font_path).get_name()
+rc('font', family=font_name)
+plt.rcParams.update({'font.size': 10})
 
 # 데이터 불러오기
 # 구매 관련 데이터 + 고객정보
@@ -108,14 +118,63 @@ print(reduced_features_train)
 
 # 고객 세분화
 # K-means 클러스터링 활용
-# 1. 최적 클러스터 개수 찾기 (Elbow Method 시각화)
+# 0. 데이터 스케일링
+# 데이터 표준화 (스케일링)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
 
-# Elbow Method 결과 시각화 저장
+# 1. 최적 클러스터 개수 찾기 (Silhouettes Method 시각화)
+silhouettes = []
+silhouette_x = []
+for k in range(2, 30):  # K 값 범위 설정 (2부터 10까지)
+    kmeans = KMeans(n_clusters=k, random_state=0)
+    kmeans.fit(X_scaled)
+    silhouettes.append(silhouette_score(X_scaled, kmeans.labels_))
+    silhouette_x.append(k)
+largest_number = max(silhouettes)
+largest_index = silhouettes.index(largest_number)
 
-# 2. K-means 클러스터링
+# Silhouette score 그래프 출력
+plt.plot(range(2, 30), silhouettes, marker='o')
+plt.xlabel('Number of clusters (K)')
+plt.ylabel('Silhouette score')
+plt.show()
 
-# 3. 클러스터별 RFM 변수 및 제품 카테고리 평균 계산 (수정된 데이터프레임 사용)
+# 2. K-means 클러스터링, 학습
+kmeans = KMeans(n_clusters=largest_index+2, random_state=0)
+kmeans.fit(X_scaled)
+cluster_labels = kmeans.labels_  # 클러스터 레이블을 변수에 할당
+
+# 클러스터 레이블을 원본 데이터프레임에 추가
+rfm_df_filtered['Cluster'] = cluster_labels
+
+# 3. 클러스터별 RFM 변수 및 제품 카테고리 평균 계산
+cluster_avg = rfm_df_filtered.groupby('Cluster')[['최근구매일자', '구매빈도', '총구매금액', 'AveragePurchaseValue'] + list(rfm_df_filtered.columns[7:27])].mean().round(2)
 
 # 4. 결과 출력 (전치 후 출력)
+print(cluster_avg.T)
+
+for i in range(largest_index + 2):
+    cluster_data = rfm_df_filtered[rfm_df_filtered['Cluster'] == i]
+    print(f"\nCluster {i}:")
+    print(f"  - 고객 수: {len(cluster_data)}")
+    print(f"  - 최근구매일자 평균: {cluster_data['최근구매일자'].mean():.2f}")
+    print(f"  - 구매빈도 평균: {cluster_data['구매빈도'].mean():.2f}")
+    print(f"  - 총구매금액 평균: {cluster_data['총구매금액'].mean():.2f}")
+    print(f"  - 평균구매금액 평균: {cluster_data['AveragePurchaseValue'].mean():.2f}")
+    print("-" * 20)
 
 # 5. 클러스터별 평균 값 시각화
+cluster_avg = rfm_df_filtered.groupby('Cluster')[['최근구매일자', '구매빈도', '총구매금액', 'AveragePurchaseValue']].mean().round(2)
+
+# 클러스터별 평균 값 막대 그래프 시각화
+plt.figure(figsize=(12, 8))
+for i, col in enumerate(cluster_avg.columns):
+    plt.subplot(2, 2, i + 1)  # 2x2 subplot 생성
+    cluster_avg[col].plot(kind='bar', rot=0)
+    plt.title(f'Cluster Average - {col}')
+    plt.xlabel('Cluster')
+    plt.ylabel(col)
+
+plt.tight_layout()
+plt.show()
