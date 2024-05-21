@@ -7,6 +7,9 @@ from sklearn.model_selection import train_test_split
 from keras import models
 from keras import layers
 from keras import callbacks
+import altair as alt
+from sklearn.cluster import KMeans
+from yellowbrick.cluster import KElbowVisualizer
 
 import data_frame
 
@@ -101,9 +104,18 @@ reduced_features_train = encoder.predict(X_train)
 
 # 4. 결과 확인
 print("Reduced features shape:", reduced_features_train.shape)
-
+print(reduced_features_train)
 
 # 고객 세분화
 # K-means 클러스터링 활용
+# 1. 최적 클러스터 개수 찾기 (Elbow Method 시각화)
 
-# 결과 해석 및 활용
+# Elbow Method 결과 시각화 저장
+
+# 2. K-means 클러스터링
+
+# 3. 클러스터별 RFM 변수 및 제품 카테고리 평균 계산 (수정된 데이터프레임 사용)
+
+# 4. 결과 출력 (전치 후 출력)
+
+# 5. 클러스터별 평균 값 시각화
