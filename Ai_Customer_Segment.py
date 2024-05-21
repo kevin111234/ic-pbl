@@ -45,26 +45,20 @@ category_df = customer_onlinesales_df.pivot_table(index='고객ID', columns='제
 rfm_df = pd.merge(rfm_df, category_df, on='고객ID', how='left')
 rfm_df = rfm_df.fillna(0)
 # 고객ID, 구매빈도 = F, 평균구매금액 = M/F, 총구매금액 = M, 최근구매일자 = R, 구매상품카테고리, 성별, 고객지역, 가입기간
-# 1. `Frequency` 값이 0인 행 식별
-zero_frequency_rows = rfm_df[rfm_df['Frequency'] == 0]
-
-# 2. `Frequency` 값이 0이 아닌 행 선택
-rfm_df_filtered = rfm_df[rfm_df['Frequency'] != 0].copy()  
-
-# 3. `AveragePurchaseValue` 계산
-rfm_df_filtered['AveragePurchaseValue'] = rfm_df_filtered['Monetary'] / rfm_df_filtered['Frequency']
-
-# 4. `zero_frequency_rows` 데이터프레임 다시 추가
-rfm_df_filtered = pd.concat([rfm_df_filtered, zero_frequency_rows])
-
-# 5. `AveragePurchaseValue` 열의 결측값 0으로 채우기
-rfm_df_filtered['AveragePurchaseValue'] = rfm_df_filtered['AveragePurchaseValue'].fillna(0)
-
-# 결과 출력
-print(rfm_df_filtered)
+zero_frequency_rows = rfm_df[rfm_df['Frequency'] == 0] # 1. `Frequency` 값이 0인 행 식별
+rfm_df_filtered = rfm_df[rfm_df['Frequency'] != 0].copy()  # 2. `Frequency` 값이 0이 아닌 행 선택
+rfm_df_filtered['AveragePurchaseValue'] = rfm_df_filtered['Monetary'] / rfm_df_filtered['Frequency'] # 3. `AveragePurchaseValue` 계산
+rfm_df_filtered = pd.concat([rfm_df_filtered, zero_frequency_rows]) # 4. `zero_frequency_rows` 데이터프레임 다시 추가
+rfm_df_filtered['AveragePurchaseValue'] = rfm_df_filtered['AveragePurchaseValue'].fillna(0) # 5. `AveragePurchaseValue` 열의 결측값 0으로 채우기
+rfm_df_filtered.columns = ['고객ID', '최근구매일자', '구매빈도', '총구매금액', '성별', '고객지역', '가입기간',
+        'Accessories', 'Android', 'Apparel', 'Backpacks', 'Bags', 'Bottles',
+        'Drinkware', 'Fun', 'Gift Cards', 'Google', 'Headgear', 'Housewares',
+        'Lifestyle', 'More Bags', 'Nest', 'Nest-Canada', 'Nest-USA',
+        'Notebooks & Journals', 'Office', 'Waze', 'AveragePurchaseValue']
 
 # 인공신경망 모델 구축
 # 오토인코더 모델 활용
+
 
 # 모델 학습
 
