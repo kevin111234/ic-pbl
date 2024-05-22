@@ -188,7 +188,6 @@ for col in demographic_cols:
         print(f"  - Cluster {cluster}: {cluster_data[col].value_counts(normalize=True).round(2)}")
 
     # 막대 그래프 시각화
-    plt.figure(figsize=(10, 6))
     rfm_df_filtered.groupby('Cluster')[col].value_counts().unstack().plot(kind='bar', rot=0)
     plt.title(f'Cluster Distribution by {col}')
     plt.xlabel('Cluster')
