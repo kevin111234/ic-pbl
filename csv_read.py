@@ -1,9 +1,8 @@
 import pandas as pd
 
-# 로우데이터 읽기
 def csv_read(csv_file):
     try:
-        df = pd.read_csv(csv_file, encoding="cp949")
+        df = pd.read_csv(f"additional_file/{csv_file}", encoding="cp949")
         return(df)
     except FileNotFoundError:
         print(f"오류: 파일을 찾을 수 없습니다 - {csv_file}")
@@ -11,7 +10,7 @@ def csv_read(csv_file):
     except pd.errors.ParserError:
         print(f"오류: CSV 파일 파싱 오류 - {csv_file}")
         return None
-
+    
 
 # 데이터 클랜징
 # 결측값 확인
