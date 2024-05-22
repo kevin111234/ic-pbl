@@ -15,7 +15,8 @@ plt.rcParams.update({'font.size': 10})
 
 # 데이터 로드
 sql_pswd = input("SQL 비밀번호를 입력해주세요: ")
-data_frame.all_data(sql_pswd)
+data_frame.customer_onlinesales_all(sql_pswd)
+data_frame.customer(sql_pswd)
 RFM_df = data_frame.customer_onlinesales_all_df
 RFM_df["날짜"]= pd.to_datetime(RFM_df['날짜'])
 
