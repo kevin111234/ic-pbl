@@ -134,3 +134,11 @@ def customer_onlinesales_all(sql_pswd):
     engine,query = data_output.db_group_1column("customer_info.고객ID, 성별, 고객지역, 날짜, 제품카테고리, (평균금액*수량+배송료)AS 구매금액",
                                                 "customer_info", "onlinesales_info", "고객ID", sql_pswd)
     customer_onlinesales_all_df = pd.read_sql(query, engine)
+
+    # 고객정보 판매정보 결합
+def customer_onlinesales_category(sql_pswd):
+    global customer_onlinesales_category_df # 고객 구매정보 종합 데이터
+    engine,query = data_output.db_group_1column("customer_info.`고객ID`, customer_info.`성별`,customer_info.`고객지역`,customer_info.`가입기간`, customer_info.`고객분류`,제품카테고리, SUM(평균금액*수량+배송료), SUM(수량)",
+                                                "customer_info", "onlinesales_info", "고객ID", sql_pswd,
+                                                "GROUP BY customer_info.`고객ID`, onlinesales_info.`제품카테고리`")
+    customer_onlinesales_category_df = pd.read_sql(query, engine)
