@@ -8,17 +8,19 @@ customer_table = """
         성별 CHAR(1),
         고객지역 VARCHAR(255),
         가입기간 INT,
-        고객분류 VARCHAR(255)
+        고객분류1 VARCHAR(255),
+        고객분류2 INT
         );
     """
 customer_save = """
-    insert into customer_info (고객ID,성별,고객지역,가입기간,고객분류)
-    values (%s,%s,%s,%s,%s)
+    insert into customer_info (고객ID,성별,고객지역,가입기간,고객분류1,고객분류2)
+    values (%s,%s,%s,%s,%s,%s)
     on duplicate key update
     성별 = VALUES(성별),
     고객지역 = VALUES(고객지역),
     가입기간 = VALUES(가입기간),
-    고객분류 = VALUES(고객분류);
+    고객분류1 = VALUES(고객분류1),
+    고객분류2 = VALUES(고객분류2);
 """
 
 discount_table = """

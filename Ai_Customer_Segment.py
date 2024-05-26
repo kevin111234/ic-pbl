@@ -2,18 +2,16 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 import numpy as np
-from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 from keras import models
 from keras import layers
 from keras import callbacks
-import altair as alt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
 from matplotlib import pyplot as plt
 from matplotlib import font_manager, rc
 
+import data_save
 import data_frame
 
 # 한글 폰트 경로 설정
@@ -123,24 +121,10 @@ print(reduced_features_train)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# 1. 최적 클러스터 개수 찾기 (Silhouettes Method 시각화)
-silhouettes = []
-silhouette_x = []
-for k in range(2, 30):  # K 값 범위 설정 (2부터 10까지)
-    kmeans = KMeans(n_clusters=k, random_state=0)
-    kmeans.fit(X_scaled)
-    silhouettes.append(silhouette_score(X_scaled, kmeans.labels_))
-    silhouette_x.append(k)
-largest_number = max(silhouettes)
-largest_index = silhouettes.index(largest_number)
+largest_index = 6
+largest_number = 6
 
-# Silhouette score 그래프 출력
-plt.plot(range(2, 30), silhouettes, marker='o')
-plt.xlabel('Number of clusters (K)')
-plt.ylabel('Silhouette score')
-plt.show()
-
-# 2. K-means 클러스터링, 학습
+# K-means 클러스터링, 학습
 kmeans = KMeans(n_clusters=largest_index+2, random_state=0)
 kmeans.fit(X_scaled)
 cluster_labels = kmeans.labels_  # 클러스터 레이블을 변수에 할당
@@ -148,10 +132,12 @@ cluster_labels = kmeans.labels_  # 클러스터 레이블을 변수에 할당
 # 클러스터 레이블을 원본 데이터프레임에 추가
 rfm_df_filtered['Cluster'] = cluster_labels
 
-# 3. 클러스터별 RFM 변수 및 제품 카테고리 평균 계산
+# 클러스터별 RFM 변수 및 제품 카테고리 평균 계산
 cluster_avg = rfm_df_filtered.groupby('Cluster')[['최근구매일자', '구매빈도', '총구매금액', 'AveragePurchaseValue'] + list(rfm_df_filtered.columns[7:27])].mean().round(2)
+customer_segment = rfm_df_filtered[['고객ID', 'Cluster']]
+print(customer_segment)
 
-# 4. 결과 출력 (전치 후 출력)
+# 결과 출력 (전치 후 출력)
 print(cluster_avg.T)
 
 for i in range(largest_index + 2):
@@ -168,10 +154,11 @@ for i in range(largest_index + 2):
 cluster_avg = rfm_df_filtered.groupby('Cluster')[['최근구매일자', '구매빈도', '총구매금액', 'AveragePurchaseValue']].mean().round(2)
 
 # 클러스터별 평균 값 막대 그래프 시각화
+colors = ['#FAEDDA', '#AEE8CA', '#6ACFC9', '#26B6C6']
 plt.figure(figsize=(12, 8))
 for i, col in enumerate(cluster_avg.columns):
     plt.subplot(2, 2, i + 1)  # 2x2 subplot 생성
-    cluster_avg[col].plot(kind='bar', rot=0)
+    cluster_avg[col].plot(kind='bar', rot=0, color=colors[i])
     plt.title(f'Cluster Average - {col}')
     plt.xlabel('Cluster')
     plt.ylabel(col)
@@ -188,9 +175,32 @@ for col in demographic_cols:
         print(f"  - Cluster {cluster}: {cluster_data[col].value_counts(normalize=True).round(2)}")
 
     # 막대 그래프 시각화
-    plt.figure(figsize=(10, 6))
     rfm_df_filtered.groupby('Cluster')[col].value_counts().unstack().plot(kind='bar', rot=0)
     plt.title(f'Cluster Distribution by {col}')
     plt.xlabel('Cluster')
     plt.ylabel('Count')
     plt.show()
+
+# 클러스터별 제품 카테고리 구매 비율 계산 및 시각화
+category_columns = list(rfm_df_filtered.columns[7:27])
+cluster_colors = ['#5068F2', '#6683D9', '#FA7F08', '#F24405', '#BAA0F2', '#9340E8','#8CDB50','#66CC1F']  # 클러스터별 색상 지정
+
+for cluster in rfm_df_filtered['Cluster'].unique():
+    cluster_data = rfm_df_filtered[rfm_df_filtered['Cluster'] == cluster]
+    cluster_size = len(cluster_data)
+    category_sums = cluster_data[category_columns].sum()
+    category_ratios = (category_sums / cluster_size).sort_values(ascending=False)
+    
+    plt.figure(figsize=(10, 6))
+    category_ratios.plot(kind='bar', rot=90, color=cluster_colors[cluster])  # 클러스터별 색상 적용
+    plt.title(f'Cluster {cluster} - Product Category Purchase Ratios')
+    plt.xlabel('Product Category')
+    plt.ylabel('Average Purchase Ratio')
+    plt.show()
+
+# 데이터베이스에 분류결과 저장
+"""data_frame.customer(sql_pswd)
+customer_info = data_frame.customer_df
+customer_info = pd.merge(customer_info, customer_segment, on='고객ID', how='left')
+customer_info = customer_info[["고객ID","성별","고객지역","가입기간","고객분류1","Cluster"]]
+data_save.save_to_db(customer_info, "customer", sql_pswd)"""
