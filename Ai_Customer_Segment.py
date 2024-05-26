@@ -121,26 +121,10 @@ print(reduced_features_train)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# 1. 최적 클러스터 개수 찾기 (Silhouettes Method 시각화)
-"""silhouettes = []
-silhouette_x = []
-for k in range(2, 30):  # K 값 범위 설정 (2부터 10까지)
-    kmeans = KMeans(n_clusters=k, random_state=0)
-    kmeans.fit(X_scaled)
-    silhouettes.append(silhouette_score(X_scaled, kmeans.labels_))
-    silhouette_x.append(k)
-largest_number = max(silhouettes)
-largest_index = silhouettes.index(largest_number)
-
-# Silhouette score 그래프 출력
-plt.plot(range(2, 30), silhouettes, marker='o')
-plt.xlabel('Number of clusters (K)')
-plt.ylabel('Silhouette score')
-plt.show()"""
 largest_index = 6
 largest_number = 6
 
-# 2. K-means 클러스터링, 학습
+# K-means 클러스터링, 학습
 kmeans = KMeans(n_clusters=largest_index+2, random_state=0)
 kmeans.fit(X_scaled)
 cluster_labels = kmeans.labels_  # 클러스터 레이블을 변수에 할당
@@ -148,12 +132,12 @@ cluster_labels = kmeans.labels_  # 클러스터 레이블을 변수에 할당
 # 클러스터 레이블을 원본 데이터프레임에 추가
 rfm_df_filtered['Cluster'] = cluster_labels
 
-# 3. 클러스터별 RFM 변수 및 제품 카테고리 평균 계산
+# 클러스터별 RFM 변수 및 제품 카테고리 평균 계산
 cluster_avg = rfm_df_filtered.groupby('Cluster')[['최근구매일자', '구매빈도', '총구매금액', 'AveragePurchaseValue'] + list(rfm_df_filtered.columns[7:27])].mean().round(2)
 customer_segment = rfm_df_filtered[['고객ID', 'Cluster']]
 print(customer_segment)
 
-# 4. 결과 출력 (전치 후 출력)
+# 결과 출력 (전치 후 출력)
 print(cluster_avg.T)
 
 for i in range(largest_index + 2):
