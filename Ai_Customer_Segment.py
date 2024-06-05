@@ -10,6 +10,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from matplotlib import pyplot as plt
 from matplotlib import font_manager, rc
+from sklearn.metrics import silhouette_score
 
 import data_save
 import data_frame
@@ -121,6 +122,20 @@ print(reduced_features_train)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
+silhouettes = []
+silhouette_x = []
+for k in range(2, 30):  # K 값 범위 설정 (2부터 10까지)
+    kmeans = KMeans(n_clusters=k, random_state=0)
+    kmeans.fit(X_scaled)
+    silhouettes.append(silhouette_score(X_scaled, kmeans.labels_))
+    silhouette_x.append(k)
+largest_number = max(silhouettes)
+largest_index = silhouettes.index(largest_number)
+# Silhouette score 그래프 출력
+plt.plot(range(2, 30), silhouettes, marker='o')
+plt.xlabel('Number of clusters (K)')
+plt.ylabel('Silhouette score')
+plt.show()
 largest_index = 6
 largest_number = 6
 

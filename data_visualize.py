@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.manifold import TSNE
 import seaborn as sns
 
-import data_output
+import data_save
 import data_frame
 
 # 한글 폰트 경로 설정
@@ -235,21 +235,33 @@ plt.xticks()
 plt.show()
 
 # 카테고리별 할인율에 따른 누적 비중과 구매금액에 따른 비율
-plt.figure(figsize=(12, 8))
-for i, rate in enumerate(discount_rates):
-    data = data_frame.rate_discount_df[data_frame.rate_discount_df['할인율'] == rate]
-    used_ratio_cumulative += data['used_ratio']
-    not_used_ratio_cumulative += data['not_used_ratio']
-    clicked_ratio_cumulative += data['clicked_ratio']
-    plt.bar(categories, used_ratio_cumulative, label='used_ratio' if i == 0 else None, color=colors[0], alpha=0.5)
-    plt.bar(categories, not_used_ratio_cumulative, label='not_used_ratio' if i == 0 else None, bottom=used_ratio_cumulative, color=colors[1], alpha=0.5)
-    plt.bar(categories, clicked_ratio_cumulative, label='clicked_ratio' if i == 0 else None, bottom=used_ratio_cumulative+not_used_ratio_cumulative, color=colors[2], alpha=0.5)
+plt.figure(figsize=(10, 6))
+query = '''SELECT 
+    제품카테고리,
+    SUM(CASE WHEN 쿠폰상태 = 'Used' THEN 수량 ELSE 0 END) / SUM(수량) * 100 AS 사용한_비율,
+    SUM(CASE WHEN 쿠폰상태 = 'Not Used' THEN 수량 ELSE 0 END) / SUM(수량) * 100 AS 사용하지_않은_비율,
+    SUM(CASE WHEN 쿠폰상태 = 'Clicked' THEN 수량 ELSE 0 END) / SUM(수량) * 100 AS 클릭만_한_비율
+FROM 
+    onlinesales_info
+GROUP BY 
+    제품카테고리;'''
+engine = data_save.sql_setting_Alchemy(sql_pswd)
+df=pd.read_sql(query,engine)
+# 각 비율을 막대 그래프로 그립니다.
+plt.bar(df['제품카테고리'], df['사용한_비율'], label='사용한 비율', color='skyblue')
+plt.bar(df['제품카테고리'], df['사용하지_않은_비율'], bottom=df['사용한_비율'], label='사용하지 않은 비율', color='lightcoral')
+plt.bar(df['제품카테고리'], df['클릭만_한_비율'], bottom=df['사용하지_않은_비율'] + df['사용한_비율'], label='클릭만 한 비율', color='lightgreen')
 
-plt.title('제품 카테고리별 할인율에 따른 누적 비중과 구매금액에 따른 비율')
+# 그래프에 제목, 축 레이블, 범례를 추가합니다.
+plt.title('제품 카테고리별 할인율에 따른 누적 비중')
 plt.xlabel('제품 카테고리')
-plt.ylabel('누적 비중 / 구매금액')
+plt.ylabel('누적 비중')
 plt.legend(title='비율 종류')
+
+# x 축 라벨이 겹치지 않도록 설정합니다.
 plt.xticks(rotation=90)
+
+# 그래프를 표시합니다.
 plt.tight_layout()
 plt.show()
 
